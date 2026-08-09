@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lipla-jp"
+version = "0.1.0"
+description = "License plate recognition"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "huggingface-hub>=0.34.0,<2",
+    "numpy>=2.5.1",
+    "opencv-python>=5.0.0.93",
+    "pillow>=12.3.0",
+    "matplotlib",
+    "onnxruntime>=1.28.0",
+    "shapely>=2.1.2",
+    "pyyaml>=6.0.3"
+]
+
+[dependency-groups]
+dev = [
+    "ipykernel",
+    "pytest",
+    "ruff",
+]
+
+[tool.setuptools.packages.find]
+include = ["lipla*"]
+namespaces = true
+
+[tool.setuptools.package-data]
+lipla = ["configs/*.yml"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
