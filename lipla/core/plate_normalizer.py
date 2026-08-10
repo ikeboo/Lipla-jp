@@ -5,6 +5,17 @@ import numpy as np
 
 
 class PlateNormalizer:
+    """ナンバープレートを指定サイズへ射影・色補正する。
+
+    Args:
+        width: 出力画像の幅。
+        height: 出力画像の高さ。
+
+    Raises:
+        TypeError: 幅または高さが整数ではない場合。
+        ValueError: 幅または高さが2未満の場合。
+    """
+
     def __init__(self, width: int = 320, height: int = 160):
         for name, value in (("width", width), ("height", height)):
             if not isinstance(value, int) or isinstance(value, bool):
@@ -15,13 +26,18 @@ class PlateNormalizer:
         self.height = height
 
     def normalize(self, image: np.ndarray, vertices: np.ndarray) -> np.ndarray:
-        """ナンバープレートの正規化を行う
+        """4頂点で囲まれたナンバープレートを正規化する。
+
         Args:
-            image: 入力画像 (numpy.ndarray)
-            vertices: 左上、右上、右下、左下の4頂点座標
-                (numpy.ndarray, shape: [4, 2])
+            image: プレートを含むBGR画像。
+            vertices: 左上、右上、右下、左下の順に並べた4頂点座標。
+
         Returns:
-            正規化されたナンバープレート画像 (numpy.ndarray)
+            指定サイズへ射影・色補正したBGR画像。
+
+        Raises:
+            TypeError: 画像または頂点の型が不正な場合。
+            ValueError: 画像、頂点の形状、または四角形が不正な場合。
         """
         self._validate_image(image)
         source_points = np.asarray(vertices, dtype=np.float32)
@@ -54,11 +70,17 @@ class PlateNormalizer:
         return normalized_image
 
     def normalize_color(self, image: np.ndarray) -> np.ndarray:
-        """ナンバープレート画像の色を正規化する
+        """ナンバープレート画像の輝度コントラストを補正する。
+
         Args:
-            image: 入力画像 (numpy.ndarray)
+            image: 補正するBGR画像。
+
         Returns:
-            正規化されたナンバープレート画像 (numpy.ndarray)
+            必要に応じてCLAHEを適用したBGR画像。
+
+        Raises:
+            TypeError: 画像の型またはデータ型が不正な場合。
+            ValueError: 画像が空、またはBGR画像ではない場合。
         """
         self._validate_image(image)
 

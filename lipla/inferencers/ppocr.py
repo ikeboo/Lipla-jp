@@ -1,4 +1,4 @@
-"""PP-OCR text detection and recognition inference."""
+"""PP-OCRによる文字領域検出と文字認識。"""
 
 from collections.abc import Iterable
 from dataclasses import dataclass, field
@@ -31,7 +31,14 @@ _CHARACTER_FILTER_NAMES = (
 
 @dataclass(slots=True, eq=False)
 class OCRResult:
-    """1枚の画像に対するOCR結果。"""
+    """1枚の画像に対するOCR結果。
+
+    Attributes:
+        image: OCRへ入力したBGR画像。
+        boxes: 各文字領域の4頂点座標。
+        scores: 各文字列の認識信頼度。
+        texts: 各文字領域から認識した文字列。
+    """
 
     image: np.ndarray = field(repr=False)
     boxes: list[list[list[int]]]  # 各文字領域の4頂点座標
@@ -46,6 +53,8 @@ class OCRResult:
 
 
 class CTCDecoder:
+    """文字辞書と用途別フィルターを使ってCTC出力を復号する。"""
+
     FILTER_NAMES = _CHARACTER_FILTER_NAMES
 
     def __init__(
@@ -55,11 +64,15 @@ class CTCDecoder:
         *,
         new_area_names: list[str] | None = None,
     ):
-        """キャラクター辞書の読み込み
+        """CTCデコーダーを初期化する。
+
         Args:
-            dict_path: PaddleOCR公式の辞書ファイルへのパス
-            characters_path: ナンバープレートで使用する文字を分類したYAMLへのパス
-            new_area_names: YAMLの地名に追加する新しい地名
+            dict_path: PaddleOCR公式の文字辞書へのパス。
+            characters_path: ナンバープレート用文字分類YAMLへのパス。
+            new_area_names: YAML内の地名へ追加する新しい地名。
+
+        Raises:
+            ValueError: 文字辞書または文字分類YAMLの内容が不正な場合。
         """
         with Path(dict_path).open("r", encoding="utf-8") as file:
             data = yaml.safe_load(file)
@@ -101,11 +114,18 @@ class CTCDecoder:
         preds: np.ndarray,
         filters: Iterable[str] | None = FILTER_NAMES,
     ) -> tuple[str, float]:
-        """ONNXモデルの出力（確率マップ）を文字列に変換する
+        """ONNXモデルの確率マップを文字列へ変換する。
+
         Args:
-            preds: ONNX Runtimeの出力 (Shape: [1, タイムステップ数, 辞書数])
-            filters: 使用する文字分類（areas, hiragana, alphabet, numbers, symbols）。
-                Noneの場合はフィルターしない。
+            preds: ``(1, タイムステップ数, 辞書数)`` 形状のモデル出力。
+            filters: 利用する文字分類。``None`` の場合は制限しない。
+
+        Returns:
+            復号した文字列と、採用した文字確率の平均値。
+
+        Raises:
+            TypeError: ``filters`` に文字列を直接指定した場合。
+            ValueError: 出力形状、確率値、またはフィルター名が不正な場合。
         """
         probabilities = np.asarray(preds)
         if probabilities.ndim != 3 or probabilities.shape[0] != 1:
@@ -195,10 +215,14 @@ def _validate_positive_integer(name: str, value: int) -> int:
 def preprocess_det(
     img: np.ndarray, target_size: int = 736
 ) -> tuple[np.ndarray, tuple[float, float]]:
-    """PP-OCRv6 テキスト検出モデル向け前処理
+    """PP-OCRv6文字検出モデル向けに画像を前処理する。
+
     Args:
-        img: OpenCVで読み込んだBGR画像 (H, W, C)
-        target_size: 長辺の目標ピクセルサイズ（32の倍数）
+        img: OpenCVで読み込んだBGR画像。
+        target_size: 長辺の目標ピクセルサイズ。
+
+    Returns:
+        NCHW形式の入力テンソルと、x軸・y軸それぞれのリサイズ倍率。
     """
     _validate_bgr_image(img)
     target_size = _validate_positive_integer("target_size", target_size)
@@ -233,14 +257,23 @@ def postprocess_dbnet(
     box_thresh: float = 0.6,
     max_candidates: int = 1000,
 ) -> tuple[list[list[list[int]]], list[float]]:
-    """DBNetのONNX出力から元の画像サイズの4頂点座標リストへ変換する
+    """DBNetの出力を元画像上の文字領域へ変換する。
+
     Args:
-        onnx_outputs: ONNX Runtimeの session.run() から返された出力リスト (通常は shape [1, 1, H, W])
-        original_shape: 元画像のサイズ (元のH, 元のW)
-        scale: 前処理（リサイズ）時に適用した拡大縮小倍率 (ターゲットサイズ / 元の長辺)
-        thresh: 確率マップを2値化するための閾値
-        box_thresh: 抽出したテキストボックス全体の平均スコアに対する閾値
-        max_candidates: 検出するテキストボックスの最大数
+        onnx_outputs: ONNX Runtimeが返した文字領域の確率マップ。
+        original_shape: 元画像の ``(高さ, 幅)``。
+        scale: 前処理時の倍率、またはx軸・y軸それぞれの倍率。
+        thresh: 確率マップを二値化する閾値。
+        box_thresh: 文字領域を採用する平均信頼度の下限。
+        max_candidates: 検出する文字領域の最大数。
+
+    Returns:
+        元画像上の4頂点座標リストと、各文字領域の信頼度。
+
+    Raises:
+        TypeError: 閾値または最大候補数の型が不正な場合。
+        ValueError: 画像形状、倍率、閾値、候補数、またはモデル出力が
+            不正な場合。
     """
     if len(original_shape) != 2 or min(original_shape) <= 0:
         raise ValueError("original_shape must contain positive height and width")
@@ -308,7 +341,14 @@ def postprocess_dbnet(
 
 
 def get_mini_boxes(contour: np.ndarray) -> tuple[np.ndarray, float]:
-    """輪郭から最小の外接矩形（4頂点）と短辺の長さを取得する補助関数"""
+    """輪郭を囲む最小矩形と短辺の長さを取得する。
+
+    Args:
+        contour: OpenCV形式の輪郭点。
+
+    Returns:
+        左上、右上、右下、左下の順の4頂点と、矩形の短辺長。
+    """
     bounding_box = cv2.minAreaRect(contour)
     points = sorted(list(cv2.boxPoints(bounding_box)), key=lambda x: x[0])
     # 頂点の順序を（左上、右上、右下、左下）にソ整列
@@ -331,7 +371,15 @@ def get_mini_boxes(contour: np.ndarray) -> tuple[np.ndarray, float]:
 
 
 def box_score_fast(bitmap: np.ndarray, box: np.ndarray) -> float:
-    """四角形領域内の確率マップの平均値を高速に計算する補助関数"""
+    """四角形領域内にある確率マップの平均値を計算する。
+
+    Args:
+        bitmap: 文字領域の確率マップ。
+        box: 平均値を求める四角形の頂点座標。
+
+    Returns:
+        四角形内部の平均確率。
+    """
     h, w = bitmap.shape[:2]
     box = box.copy()
     xmin = np.clip(np.floor(box[:, 0].min()).astype(np.int32), 0, w - 1)
@@ -347,7 +395,15 @@ def box_score_fast(bitmap: np.ndarray, box: np.ndarray) -> float:
 
 
 def unclip(box: np.ndarray, unclip_ratio: float = 1.5) -> np.ndarray:
-    """テキストボックスを少しだけ外側に拡張する補助関数（ポリゴン拡張）"""
+    """文字領域の多角形を外側へ拡張する。
+
+    Args:
+        box: 拡張する多角形の頂点座標。
+        unclip_ratio: 多角形の面積と周長に対する拡張率。
+
+    Returns:
+        拡張後の頂点座標。拡張できない場合は空配列。
+    """
     poly = Polygon(box)
     if not poly.is_valid:
         poly = poly.convex_hull
@@ -373,12 +429,18 @@ def unclip(box: np.ndarray, unclip_ratio: float = 1.5) -> np.ndarray:
 def crop_and_get_perspective(
     img: np.ndarray, points: list[list[int]] | np.ndarray
 ) -> np.ndarray:
-    """斜めのテキスト領域を水平に補正して切り出す（透視変換）
+    """斜めの文字領域を透視変換で水平に補正して切り出す。
+
     Args:
-        img: 元のBGR画像 (H, W, C)
-        points: 検出された4つの頂点座標。形状は (4, 2) の numpy 配列
-                [[x0, y0], [x1, y1], [x2, y2], [x3, y3]]
-                （通常、左上・右上・右下・左下の順）
+        img: 切り出し元のBGR画像。
+        points: 左上、右上、右下、左下の順に並べた4頂点座標。
+
+    Returns:
+        傾きを補正して切り出したBGR画像。
+
+    Raises:
+        TypeError: 画像または頂点の型が不正な場合。
+        ValueError: 画像、頂点の形状、または四角形が不正な場合。
     """
     _validate_bgr_image(img)
     pts = np.asarray(points, dtype=np.float32)
@@ -424,10 +486,14 @@ def crop_and_get_perspective(
 
 
 def preprocess_rec(cropped_img: np.ndarray, target_height: int = 48) -> np.ndarray:
-    """PP-OCRv6 テキスト認識モデル向け前処理
+    """PP-OCRv6文字認識モデル向けに切り出し画像を前処理する。
+
     Args:
-        cropped_img: 検出結果のバウンディングボックスから切り出した、傾き補正済みの部分画像(BGR)
-        target_height: PP-OCRv6では 48 ピクセル固定
+        cropped_img: 傾きを補正して切り出したBGR画像。
+        target_height: モデルへ入力する画像の高さ。
+
+    Returns:
+        アスペクト比を保ってリサイズ・正規化したNCHW形式のテンソル。
     """
     _validate_bgr_image(cropped_img)
     target_height = _validate_positive_integer("target_height", target_height)
@@ -450,7 +516,25 @@ def preprocess_rec(cropped_img: np.ndarray, target_height: int = 48) -> np.ndarr
 
 
 class PPOCR:
-    """PP-OCRの文字検出・文字認識をまとめて実行する。"""
+    """PP-OCRの文字検出と文字認識をまとめて実行する。
+
+    Args:
+        det_model_path: 文字検出ONNXモデルのパス。
+        rec_model_path: 文字認識ONNXモデルのパス。
+        dict_path: PP-OCR文字辞書のパス。
+        characters_path: 用途別文字分類YAMLのパス。
+        new_area_names: 文字分類へ追加する地名。
+        det_target_size: 文字検出モデルへ入力する画像の長辺サイズ。
+        rec_target_height: 文字認識モデルへ入力する画像の高さ。
+        det_thresh: 文字領域の確率マップを二値化する閾値。
+        det_box_thresh: 文字領域を採用する平均信頼度の下限。
+        max_candidates: 検出する文字領域の最大数。
+        character_filters: 文字認識で許可する文字分類。
+        providers: ONNX Runtimeの実行プロバイダー。
+        cache_dir: モデルのキャッシュディレクトリ。
+        revision: モデルリポジトリのリビジョン。
+        local_files_only: ローカルキャッシュだけを利用するか。
+    """
 
     def __init__(
         self,
@@ -527,13 +611,27 @@ class PPOCR:
         )
 
     def __call__(self, image: np.ndarray) -> OCRResult:
-        """BGR画像を受け取り、検出領域・信頼度・認識文字列を返す。"""
+        """BGR画像内の文字領域と文字列を認識する。
+
+        Args:
+            image: OCRを実行するBGR画像。
+
+        Returns:
+            文字領域、信頼度、文字列を持つOCR結果。
+        """
         input_tensor, scale = self._preprocess(image)
         det_outputs = self.det_session.run(None, {self.det_input_name: input_tensor})
         return self._postprocess(image, det_outputs, scale)
 
     def _preprocess(self, image: np.ndarray) -> tuple[np.ndarray, tuple[float, float]]:
-        """入力画像を検証し、文字検出モデル用テンソルへ変換する。"""
+        """入力画像を文字検出モデル用テンソルへ変換する。
+
+        Args:
+            image: 変換するBGR画像。
+
+        Returns:
+            入力テンソルとx軸・y軸のリサイズ倍率。
+        """
         return preprocess_det(image, target_size=self.det_target_size)
 
     def _postprocess(
@@ -542,7 +640,16 @@ class PPOCR:
         det_outputs: list[np.ndarray],
         scale: tuple[float, float],
     ) -> OCRResult:
-        """検出出力を座標に戻し、各領域を文字認識して結果を構築する。"""
+        """検出出力から文字領域を切り出して認識する。
+
+        Args:
+            image: OCRへ入力した元のBGR画像。
+            det_outputs: 文字検出モデルの出力。
+            scale: 前処理で適用したx軸・y軸の倍率。
+
+        Returns:
+            座標を元画像へ戻したOCR結果。
+        """
         boxes, _ = postprocess_dbnet(
             det_outputs,
             original_shape=image.shape[:2],

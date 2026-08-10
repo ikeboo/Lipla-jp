@@ -1,4 +1,5 @@
-"""
+"""EdgeCrafterを利用したナンバープレートの姿勢推定。
+
 EdgeCrafter: Compact ViTs for Edge Dense Prediction via Task-Specialized Distillation
 Copyright (c) 2026 The EdgeCrafter Authors. All Rights Reserved.
 """
@@ -21,7 +22,14 @@ from .model_loader import (
 
 @dataclass(slots=True)
 class PoseResult:
-    """1枚の画像から検出した複数オブジェクトの姿勢推定結果。"""
+    """1枚の画像から検出した複数オブジェクトの姿勢推定結果。
+
+    Attributes:
+        classes: 検出したクラスのID。
+        class_names: 検出したクラスの表示名。
+        kpts: オブジェクトごとの頂点座標。
+        scores: オブジェクトごとの検出信頼度。
+    """
 
     classes: list[int]
     class_names: list[str]
@@ -45,9 +53,15 @@ class PoseResult:
 def _decode_keypoints(
     keypoints: np.ndarray, num_keypoints: int | None = None
 ) -> np.ndarray:
-    """Decode keypoints into an ``(N, 2)`` xy array.
+    """複数形式のキーポイントを ``(N, 2)`` のxy配列へ変換する。
 
-    Supports: [K,2], [K,3], [2K], [3K].
+    Args:
+        keypoints: ``(K, 2)``、``(K, 3)``、``(2K,)``、または
+            ``(3K,)`` 形式のキーポイント。
+        num_keypoints: 期待するキーポイント数。
+
+    Returns:
+        xy座標だけを持つ ``float32`` 配列。変換できない場合は空配列。
     """
     kpts = np.asarray(keypoints)
 
@@ -70,6 +84,22 @@ def _decode_keypoints(
 
 
 class ECPose:
+    """ONNX形式のEdgeCrafter姿勢推定モデルを実行する。
+
+    Args:
+        onnx_path: ONNXモデルのパス。``None`` の場合は既定モデルを取得する。
+        thresh: 検出結果を採用する信頼度の下限。
+        providers: ONNX Runtimeの実行プロバイダー。
+        cache_dir: モデルのキャッシュディレクトリ。
+        revision: モデルリポジトリのリビジョン。
+        local_files_only: ローカルキャッシュだけを利用するか。
+
+    Raises:
+        TypeError: ``thresh`` が数値ではない場合。
+        ValueError: ``thresh`` が0から1の範囲外の場合。
+        RuntimeError: モデルの入出力またはメタデータが不正な場合。
+    """
+
     def __init__(
         self,
         onnx_path: str | Path | None = None,
@@ -130,6 +160,14 @@ class ECPose:
         self.output_names = [o.name for o in self.session.get_outputs()]
 
     def __call__(self, image: np.ndarray) -> PoseResult:
+        """画像内のオブジェクトと頂点を検出する。
+
+        Args:
+            image: ``uint8`` のBGR画像。
+
+        Returns:
+            クラス、頂点、信頼度を持つ姿勢推定結果。
+        """
         tensor, target_size = self._preprocess(image)
         input_feed = {self.image_input_name: tensor}
         if self.size_input_name is not None:

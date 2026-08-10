@@ -1,4 +1,4 @@
-"""Download Lipla model assets from the public Hugging Face repository."""
+"""公開Hugging FaceリポジトリからLiplaのモデルを取得する。"""
 
 from __future__ import annotations
 
@@ -25,11 +25,20 @@ def download_model_file(
     revision: str = MODEL_REVISION,
     local_files_only: bool = False,
 ) -> Path:
-    """Return a cached local path for a file in the Lipla model repository.
+    """Liplaモデルリポジトリ内のファイルを取得する。
 
-    Hugging Face's version-aware user cache is used rather than a directory in
-    the installed Python package.  The repository is public, and ``token=False``
-    deliberately disables implicit use of locally configured credentials.
+    インストール済みパッケージ内ではなく、Hugging Faceのバージョン対応
+    ユーザーキャッシュを利用する。公開リポジトリへ匿名で接続し、ローカルに
+    設定された認証情報は使用しない。
+
+    Args:
+        filename: モデルリポジトリ内のファイル名。
+        cache_dir: Hugging Faceキャッシュの保存先。
+        revision: 取得するコミットまたはリビジョン。
+        local_files_only: ネットワークへ接続せずキャッシュだけを利用するか。
+
+    Returns:
+        取得済みファイルのローカルパス。
     """
 
     path = hf_hub_download(
