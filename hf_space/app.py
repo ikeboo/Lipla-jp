@@ -19,33 +19,33 @@ def build_demo() -> gr.Blocks:
             "画像をドロップすると自動的に処理を開始します。"
         )
 
-        input_image = gr.Image(
-            label="入力画像",
-            type="numpy",
-            image_mode="RGB",
-            sources=["upload", "clipboard"],
-        )
+        with gr.Row():
+            input_image = gr.Image(
+                label="入力画像",
+                type="numpy",
+                image_mode="RGB",
+                sources=["upload", "clipboard"],
+            )
+            det_gallery = gr.Gallery(
+                label="検出位置",
+                columns=1,
+                object_fit="contain",
+                height="auto",
+            )
 
         with gr.Row():
-            det_gallery = gr.Gallery(
-                label="det_image",
-                columns=1,
-                object_fit="contain",
-                height="auto",
-            )
             result_gallery = gr.Gallery(
-                label="result_image",
+                label="認識結果",
                 columns=1,
                 object_fit="contain",
                 height="auto",
             )
-
-        result_json = gr.Textbox(
-            label="LPDetResult（画像以外）",
-            value="[]",
-            lines=20,
-            max_lines=30,
-        )
+            result_json = gr.Textbox(
+                label="認識結果（JSON）",
+                value="[]",
+                lines=20,
+                max_lines=30,
+            )
 
         input_image.change(
             fn=recognize_image,
