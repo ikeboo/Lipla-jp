@@ -6,9 +6,7 @@ import numpy as np
 
 from lipla import LPDetResult
 
-_MODULE_PATH = (
-    Path(__file__).resolve().parents[1] / "huggingface_space" / "space_inference.py"
-)
+_MODULE_PATH = Path(__file__).resolve().parents[1] / "hf_space" / "space_inference.py"
 _SPEC = spec_from_file_location("lipla_space_inference", _MODULE_PATH)
 assert _SPEC is not None and _SPEC.loader is not None
 _MODULE = module_from_spec(_SPEC)
