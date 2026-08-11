@@ -8,10 +8,10 @@
 
 ### ⚡️ Quick Start
 - セットアップ  
-`pip install lipla-jp`  
+`pip install git+https://github.com/ikeboo/Lipla-jp.git`
 
 - 検出実行  
-  初回のみHugging Faceからウェイトをダウンロードします。
+  初回のみHugging Faceからウェイトを自動ダウンロードします。
     ```python
     import lipla
 
@@ -42,8 +42,8 @@
     |OCR|PPOCRv6 medium|
 
 ### 🤗 Hugging Face Spaces
-`hf_space/` に公開用Gradioアプリと専用の依存ファイルがあります。
+`hf_space/` はhf公開用Gradioアプリと依存ファイルです。
 ディレクトリ内のファイルだけをSpaceリポジトリのルートへ配置してください。
-Gradioと日本語フォントはSpace側だけにインストールされ、`pip install lipla-jp`
+Gradioと日本語フォントはSpace側だけにインストールされ、上記のGitHub経由でのインストール
 の依存関係やインストール内容には含まれません。
 　　
