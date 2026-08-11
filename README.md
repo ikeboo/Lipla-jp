@@ -40,4 +40,10 @@
     |----|----|
     |プレート検出|EdgeCrafter Pose|
     |OCR|PPOCRv6 medium|
+
+### 🤗 Hugging Face Spaces
+`huggingface_space/` に公開用Gradioアプリと専用の依存ファイルがあります。
+ディレクトリ内のファイルだけをSpaceリポジトリのルートへ配置してください。
+Gradioと日本語フォントはSpace側だけにインストールされ、`pip install lipla-jp`
+の依存関係やインストール内容には含まれません。
 　　
