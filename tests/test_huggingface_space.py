@@ -1,6 +1,8 @@
 import json
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
+from types import ModuleType
+from unittest.mock import patch
 
 import numpy as np
 
@@ -10,7 +12,10 @@ _MODULE_PATH = Path(__file__).resolve().parents[1] / "hf_space" / "space_inferen
 _SPEC = spec_from_file_location("lipla_space_inference", _MODULE_PATH)
 assert _SPEC is not None and _SPEC.loader is not None
 _MODULE = module_from_spec(_SPEC)
-_SPEC.loader.exec_module(_MODULE)
+_SPACES_STUB = ModuleType("spaces")
+_SPACES_STUB.GPU = lambda **_kwargs: lambda function: function
+with patch.dict("sys.modules", {"spaces": _SPACES_STUB}):
+    _SPEC.loader.exec_module(_MODULE)
 recognize_image = _MODULE.recognize_image
 result_to_dict = _MODULE.result_to_dict
 

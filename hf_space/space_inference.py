@@ -9,6 +9,7 @@ from functools import cache
 from typing import Any
 
 import numpy as np
+import spaces
 
 from lipla import LPDetResult, Recognizer
 
@@ -52,6 +53,7 @@ def _bgr_to_rgb(image: np.ndarray) -> np.ndarray:
     return np.ascontiguousarray(image[..., ::-1])
 
 
+@spaces.GPU(duration=60)
 def recognize_image(
     image: np.ndarray | None,
     *,
