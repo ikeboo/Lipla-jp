@@ -1,17 +1,25 @@
-# Lipla-jp
-日本の自動車ナンバープレート認識用Pythonライブラリ。  
-高精度、オープンソース、商用利用可能です。
+<div align="center">
+<img src="samples/logo.png">
+</div>
+
+<p align="center"><a href="https://github.com/ikeboo/Lipla-jp"><img src="https://img.shields.io/badge/GitHub-Lipla--jp-181717?logo=github&amp;logoColor=white" alt="GitHub"></a> <a href="https://huggingface.co/bukuroo/Lipla-jp"><img src="https://img.shields.io/badge/Hugging%20Face-Lipla--jp-FFD21E?logo=huggingface" alt="Hugging Face"></a> <a href="https://huggingface.co/spaces/bukuroo/Lipla"><img src="https://img.shields.io/badge/Hugging%20Face-Spaces-FFD21E?logo=huggingface" alt="Hugging Face Spaces"></a> <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT License"></a></p>
 
 <div align="center">
 <img src="samples/results.jpg">
 </div>
 
+### 🖐️ What's Lipla?
+日本の自動車ナンバープレート認識用Pythonライブラリ。  
+高精度、オープンソース、商用利用可能。
+
 ### ⚡️ Quick Start
 - セットアップ  
-`pip install git+https://github.com/ikeboo/Lipla-jp.git`
+    ```sh
+    pip install git+https://github.com/ikeboo/Lipla-jp.git
+    ```
 
 - 検出実行  
-  初回のみHugging Faceからウェイトを自動ダウンロードします。
+  初回のみ[モデルウェイト](https://huggingface.co/bukuroo/Lipla-jp)が自動ダウンロードされます。
     ```python
     import lipla
 
@@ -40,10 +48,13 @@
     |----|----|
     |プレート検出|EdgeCrafter Pose|
     |OCR|PPOCRv6 medium|
+- ONNXベースのライブラリ、PyTorch依存なし
 
-### 🤗 Hugging Face Spaces
-`hf_space/` はhf公開用Gradioアプリと依存ファイルです。
-ディレクトリ内のファイルだけをSpaceリポジトリのルートへ配置してください。
-Gradioと日本語フォントはSpace側だけにインストールされ、上記のGitHub経由でのインストール
-の依存関係やインストール内容には含まれません。
-　　
+### 📄 License
+このプロジェクトは[MIT License](LICENSE)のもとで公開されています。
+
+### 🙏 Acknowledgements
+このプロジェクトでは、以下のオープンソースプロジェクトを利用しています。
+
+- [EdgeCrafter](https://github.com/Intellindust-AI-Lab/EdgeCrafter)
+- [PaddleOCR](https://github.com/PADDLEPADDLE/PADDLEOCR)

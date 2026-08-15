@@ -7,16 +7,16 @@ name = "lipla-jp"
 version = "0.1.0"
 description = "License plate recognition"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.11"
 dependencies = [
-    "huggingface-hub>=0.34.0,<2",
-    "numpy>=2.5.1",
-    "opencv-python>=5.0.0.93",
-    "pillow>=12.3.0",
-    "matplotlib",
-    "onnxruntime>=1.28.0",
-    "shapely>=2.1.2",
-    "pyyaml>=6.0.3"
+    "huggingface-hub>=0.20.3,<2",
+    "numpy>=1.26.4",
+    "opencv-python>=4.9.0.80",
+    "pillow>=10.2.0",
+    "matplotlib>=3.8.2",
+    "onnxruntime>=1.17.0",
+    "shapely>=2.0.3",
+    "pyyaml>=6.0.1"
 ]
 
 [dependency-groups]
@@ -34,7 +34,7 @@ namespaces = true
 lipla = ["configs/*.yml"]
 
 [tool.ruff]
-target-version = "py312"
+target-version = "py311"
 line-length = 88
 
 [tool.ruff.lint]

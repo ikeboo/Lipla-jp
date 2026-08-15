@@ -14,19 +14,11 @@ from lipla.inferencers.model_loader import MODEL_REVISION
 from lipla.inferencers.ppocr import PPOCR, OCRResult
 
 from .fixed_field_recognizer import (
-    FIELD_FILTERS,
-    FIELD_RECTS,
-    KANA_RECTS,
     FixedFieldRecognizer,
     ctc_log_probability,
     logsumexp,
 )
 from .image_processing import (
-    LOCAL_BLACK_VALUE_MAX,
-    LOCAL_GREEN_HUE_MAX,
-    LOCAL_GREEN_HUE_MIN,
-    LOCAL_GREEN_SATURATION_MIN,
-    LOCAL_GREEN_VALUE_MAX,
     as_bgr,
     pad_for_ocr,
     preprocess_local_plate,
@@ -119,26 +111,19 @@ class Recognizer:
     このクラスは処理順序の制御と公開APIの提供だけを担当する。
 
     Args:
-        pose_model_path: 姿勢推定ONNXモデルのパス。``None`` の場合は既定の
+        pose_model_path: プレート検出用EdgeCrafterPoseONNXモデルのパス。``None`` の場合は既定の
             モデルをダウンロードする。
-        ocr_det_model_path: 文字検出ONNXモデルのパス。
-        ocr_rec_model_path: 文字認識ONNXモデルのパス。
-        ocr_dict_path: PP-OCR文字辞書のパス。
-        new_area_names: 既定の語彙へ追加する地名。
+        ocr_det_model_path: PPOCR検出ONNXモデルのパス。
+        ocr_rec_model_path: PPOCR認識ONNXモデルのパス。
+        det_thresh: プレート検出の信頼度しきい値。
+        ocr_dict_path: PPOCR文字辞書のパス。
+        new_area_names: 新規地名のリスト。(新規地名が発行された際に利用)
         providers: ONNX Runtimeの実行プロバイダー。
         cache_dir: モデルのキャッシュディレクトリ。
         revision: モデルリポジトリのリビジョン。
         local_files_only: ローカルキャッシュだけを利用するか。
     """
 
-    _FIELD_RECTS = FIELD_RECTS
-    _KANA_RECTS = KANA_RECTS
-    _FIELD_FILTERS = FIELD_FILTERS
-    _LOCAL_BLACK_VALUE_MAX = LOCAL_BLACK_VALUE_MAX
-    _LOCAL_GREEN_HUE_MIN = LOCAL_GREEN_HUE_MIN
-    _LOCAL_GREEN_HUE_MAX = LOCAL_GREEN_HUE_MAX
-    _LOCAL_GREEN_SATURATION_MIN = LOCAL_GREEN_SATURATION_MIN
-    _LOCAL_GREEN_VALUE_MAX = LOCAL_GREEN_VALUE_MAX
     _LOCAL_SPATIAL_FIELDS = frozenset(("area", "class_number", "kana"))
 
     def __init__(
@@ -147,6 +132,7 @@ class Recognizer:
         ocr_det_model_path: str | Path | None = None,
         ocr_rec_model_path: str | Path | None = None,
         *,
+        det_thresh: float = 0.7,
         ocr_dict_path: str | Path | None = None,
         new_area_names: list[str] | None = None,
         providers: list[str] | None = None,
@@ -159,6 +145,7 @@ class Recognizer:
         )
         self.pose_model = ECPose(
             pose_model_path,
+            thresh=det_thresh,
             providers=providers,
             cache_dir=cache_dir,
             revision=revision,

@@ -61,7 +61,7 @@ def test_readme_recognizer_api_uses_default_downloads(monkeypatch):
         "revision": MODEL_REVISION,
         "local_files_only": False,
     }
-    assert _PoseModel.calls == [(None, shared_options)]
+    assert _PoseModel.calls == [(None, {"thresh": 0.7, **shared_options})]
     assert len(_OCRModel.calls) == 1
     det_path, rec_path, characters_path, ocr_options = _OCRModel.calls[0]
     assert det_path is None
@@ -72,6 +72,20 @@ def test_readme_recognizer_api_uses_default_downloads(monkeypatch):
         "new_area_names": None,
         **shared_options,
     }
+
+
+def test_recognizer_passes_detection_threshold_to_ecpose(monkeypatch):
+    import lipla
+    from lipla.core import license_plate_recognizer
+
+    _PoseModel.calls.clear()
+    _OCRModel.calls.clear()
+    monkeypatch.setattr(license_plate_recognizer, "ECPose", _PoseModel)
+    monkeypatch.setattr(license_plate_recognizer, "PPOCR", _OCRModel)
+
+    lipla.Recognizer(det_thresh=0.85)
+
+    assert _PoseModel.calls[0][1]["thresh"] == 0.85
 
 
 def test_recognizer_adds_new_area_names_to_ocr_and_vocabulary(monkeypatch):
