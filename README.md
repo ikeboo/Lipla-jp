@@ -26,13 +26,13 @@
     rec = lipla.Recognizer()
     results = rec("samples/00.jpg") # パスまたはcv2image
     ```
-- 出力データの詳細
+- 出力データ
     ```python
     result = results[0]  # 複数の検出結果が格納されています
     result.area          # 世田谷
-    result.class_number  # 999
-    result.kana          # あ
-    result.number        # 1234
+    result.class_number  # 種別(300)
+    result.kana          # かな(あ)
+    result.number        # 番号(1234)
     result.plate_image   # 正規化したプレート画像
     result.original_image  # 入力元画像
     result.det_image     # 検出領域を描画した元画像

@@ -275,12 +275,13 @@ class LPDetResult:
             validate_bgr_image(self.original_image)
             det_image = self.original_image.copy()
             vertices = np.rint(self.vertices).astype(np.int32).reshape(4, 1, 2)
+            line_thickness = max(1, int(round(self.original_image.shape[1] * 0.005)))
             cv2.polylines(
                 det_image,
                 [vertices],
                 isClosed=True,
                 color=(255, 0, 255),
-                thickness=2,
+                thickness=line_thickness,
             )
             self._det_image = det_image
         return self._det_image
