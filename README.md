@@ -1,12 +1,8 @@
 <div align="center">
 <img src="samples/logo.png">
-</div>
-
-<p align="center"><a href="https://github.com/ikeboo/Lipla-jp"><img src="https://img.shields.io/badge/GitHub-Lipla--jp-181717?logo=github&amp;logoColor=white" alt="GitHub"></a> <a href="https://huggingface.co/bukuroo/Lipla-jp"><img src="https://img.shields.io/badge/Hugging%20Face-Lipla--jp-FFD21E?logo=huggingface" alt="Hugging Face"></a> <a href="https://huggingface.co/spaces/bukuroo/Lipla"><img src="https://img.shields.io/badge/Hugging%20Face-Spaces-FFD21E?logo=huggingface" alt="Hugging Face Spaces"></a> <a href="https://colab.research.google.com/drive/1YUG36Q8kpGtsolwp0ZfqqitfIhmMBZ1E?usp=sharing"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"></a> <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT License"></a></p>
-
-<div align="center">
 <img src="samples/results.jpg">
 </div>
+<p align="center"><a href="https://github.com/ikeboo/Lipla-jp"><img src="https://img.shields.io/badge/GitHub-Lipla--jp-181717?logo=github&amp;logoColor=white" alt="GitHub"></a> <a href="https://huggingface.co/bukuroo/Lipla-jp"><img src="https://img.shields.io/badge/Hugging%20Face-Lipla--jp-FFD21E?logo=huggingface" alt="Hugging Face"></a> <a href="https://huggingface.co/spaces/bukuroo/Lipla"><img src="https://img.shields.io/badge/Hugging%20Face-Spaces-FFD21E?logo=huggingface" alt="Hugging Face Spaces"></a> <a href="https://colab.research.google.com/drive/1YUG36Q8kpGtsolwp0ZfqqitfIhmMBZ1E?usp=sharing"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"></a> <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT License"></a></p>
 
 ### 🖐️ What's Lipla?
 日本の自動車ナンバープレート認識用Pythonライブラリ。  
@@ -39,7 +35,7 @@
     result.result_image  # 正規化画像と認識結果の表示画像
     result.visualize()   # 検出画像と認識結果を並べて表示
     ```
-    
+
 ### ✏️Tips
 認識精度を高めるために入力画像は以下の条件が推奨されます。
 - アスペクト比は4:3
