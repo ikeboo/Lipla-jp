@@ -10,6 +10,43 @@ import numpy as np
 
 PoseDetection: TypeAlias = tuple[list[float], float, str]
 
+_MAX_OPPOSITE_EDGE_ANGLE_DEGREES = 20.0
+_ANGLE_COMPARISON_TOLERANCE_DEGREES = 1e-5
+_MIN_OPPOSITE_EDGE_LENGTH_RATIO = 0.25
+_MAX_OPPOSITE_EDGE_LENGTH_RATIO = 1.2
+_MIN_EDGE_LENGTH = 1e-6
+
+
+def _angle_between_lines_degrees(left: np.ndarray, right: np.ndarray) -> float:
+    """2つの線分が成す0度から90度までの角度を返す。"""
+    cosine = abs(float(np.dot(left, right))) / (
+        float(np.linalg.norm(left)) * float(np.linalg.norm(right))
+    )
+    return float(np.degrees(np.arccos(np.clip(cosine, 0.0, 1.0))))
+
+
+def _has_plausible_plate_shape(polygon: np.ndarray) -> bool:
+    """四角形の対辺の平行度と長さ比がプレートとして妥当か判定する。"""
+    vertices = np.asarray(polygon, dtype=np.float64)
+    edges = np.roll(vertices, -1, axis=0) - vertices
+    edge_lengths = np.linalg.norm(edges, axis=1)
+    if np.any(edge_lengths <= _MIN_EDGE_LENGTH):
+        return False
+
+    if _angle_between_lines_degrees(edges[0], edges[2]) >= (
+        _MAX_OPPOSITE_EDGE_ANGLE_DEGREES - _ANGLE_COMPARISON_TOLERANCE_DEGREES
+    ) or _angle_between_lines_degrees(edges[1], edges[3]) >= (
+        _MAX_OPPOSITE_EDGE_ANGLE_DEGREES - _ANGLE_COMPARISON_TOLERANCE_DEGREES
+    ):
+        return False
+
+    first_pair_mean = float((edge_lengths[0] + edge_lengths[2]) / 2.0)
+    second_pair_mean = float((edge_lengths[1] + edge_lengths[3]) / 2.0)
+    length_ratio = first_pair_mean / second_pair_mean
+    return (
+        _MIN_OPPOSITE_EDGE_LENGTH_RATIO < length_ratio < _MAX_OPPOSITE_EDGE_LENGTH_RATIO
+    )
+
 
 def polygon_iou(left: np.ndarray, right: np.ndarray) -> float:
     """2つの凸多角形のIoUを計算する。
@@ -39,7 +76,8 @@ def suppress_duplicate_detections(
 ) -> list[PoseDetection]:
     """重複する姿勢推定結果を信頼度順に除外する。
 
-    不正な頂点、非有限値、面積を持たない四角形も同時に除外する。
+    不正な頂点、非有限値、面積を持たない四角形に加えて、対辺の角度や
+    長さの比率がナンバープレートとして不自然な四角形も同時に除外する。
 
     Args:
         detections: 頂点座標、信頼度、クラス名からなる検出結果。
@@ -69,6 +107,8 @@ def suppress_duplicate_detections(
         if abs(float(cv2.contourArea(polygon))) <= 1e-6:
             continue
         if not cv2.isContourConvex(polygon):
+            continue
+        if not _has_plausible_plate_shape(polygon):
             continue
         valid_detections.append(((raw_vertices, score, class_name), polygon))
 

@@ -1,3 +1,5 @@
+import math
+
 import numpy as np
 import pytest
 
@@ -37,6 +39,65 @@ def test_suppress_duplicate_detections_ignores_invalid_polygons():
     ]
 
     assert suppress_duplicate_detections(detections) == [valid]
+
+
+@pytest.mark.parametrize(
+    "vertices",
+    [
+        [0, 0, 0, 10, 20, 10, 16, 0],
+        [0, 0, 0, 10, 20, 18, 20, 0],
+        [
+            0,
+            0,
+            0,
+            10,
+            20,
+            10,
+            20 - 10 * math.tan(math.radians(20)),
+            0,
+        ],
+    ],
+)
+def test_suppress_duplicate_detections_excludes_non_parallel_opposite_edges(
+    vertices,
+):
+    detection = (vertices, 0.9, "private")
+
+    assert suppress_duplicate_detections([detection]) == []
+
+
+@pytest.mark.parametrize(
+    "vertices",
+    [
+        _vertices(0, 0, 20, 4),
+        _vertices(0, 0, 20, 5),
+        _vertices(0, 0, 10, 12),
+        _vertices(0, 0, 10, 13),
+    ],
+)
+def test_suppress_duplicate_detections_excludes_invalid_edge_length_ratio(vertices):
+    detection = (vertices, 0.9, "private")
+
+    assert suppress_duplicate_detections([detection]) == []
+
+
+def test_suppress_duplicate_detections_keeps_plausible_trapezoid():
+    detection = (
+        [
+            0,
+            0,
+            0,
+            10,
+            20,
+            10,
+            20 - 10 * math.tan(math.radians(19.9)),
+            0,
+        ],
+        0.9,
+        "private",
+    )
+
+    assert suppress_duplicate_detections([detection]) == [detection]
 
 
 @pytest.mark.parametrize("threshold", [-0.1, 1.1, float("nan")])
