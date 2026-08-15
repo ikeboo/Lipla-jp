@@ -1,3 +1,4 @@
+import io
 from types import SimpleNamespace
 
 import numpy as np
@@ -145,6 +146,9 @@ def test_system_japanese_font_falls_back_to_next_candidate(monkeypatch):
             raise OSError("font not found")
         return loaded_font
 
+    def fail_fallback(*_args, **_kwargs):
+        raise AssertionError("fallback font must not be downloaded")
+
     monkeypatch.setattr(
         license_plate_recognizer,
         "_SYSTEM_JAPANESE_FONT_CANDIDATES",
@@ -153,12 +157,65 @@ def test_system_japanese_font_falls_back_to_next_candidate(monkeypatch):
     monkeypatch.setattr(
         license_plate_recognizer.ImageFont, "truetype", load_font
     )
+    monkeypatch.setattr(
+        license_plate_recognizer,
+        "_load_fallback_japanese_font",
+        fail_fallback,
+    )
 
     assert license_plate_recognizer._load_system_japanese_font(24) is loaded_font
     assert calls == [("unavailable.ttf", 24), ("system-japanese.ttf", 24)]
 
 
-def test_system_japanese_font_error_lists_attempted_fonts(monkeypatch):
+def test_missing_system_font_downloads_and_reuses_fallback(monkeypatch, tmp_path):
+    from lipla.core import license_plate_recognizer, recognition_result
+
+    loaded_font = object()
+    fallback_path = tmp_path / recognition_result.FALLBACK_JAPANESE_FONT_FILENAME
+    font_calls = []
+    download_calls = []
+
+    monkeypatch.setattr(
+        license_plate_recognizer,
+        "_SYSTEM_JAPANESE_FONT_CANDIDATES",
+        ("unavailable.ttf",),
+    )
+    monkeypatch.setattr(
+        recognition_result, "FALLBACK_JAPANESE_FONT_CACHE_DIR", tmp_path
+    )
+
+    def load_font(font_name, font_size):
+        font_calls.append((font_name, font_size))
+        if font_name == "unavailable.ttf":
+            raise OSError("font not found")
+        assert font_name == fallback_path
+        return loaded_font
+
+    def urlopen(request, timeout):
+        download_calls.append((request.full_url, timeout))
+        return io.BytesIO(b"font data")
+
+    monkeypatch.setattr(license_plate_recognizer.ImageFont, "truetype", load_font)
+    monkeypatch.setattr(recognition_result.urllib.request, "urlopen", urlopen)
+
+    assert license_plate_recognizer._load_system_japanese_font(24) is loaded_font
+    assert license_plate_recognizer._load_system_japanese_font(24) is loaded_font
+    assert fallback_path.read_bytes() == b"font data"
+    assert download_calls == [
+        (
+            recognition_result.FALLBACK_JAPANESE_FONT_URL,
+            recognition_result._FONT_DOWNLOAD_TIMEOUT_SECONDS,
+        )
+    ]
+    assert font_calls == [
+        ("unavailable.ttf", 24),
+        (fallback_path, 24),
+        ("unavailable.ttf", 24),
+        (fallback_path, 24),
+    ]
+
+
+def test_font_error_lists_attempted_fonts_when_download_fails(monkeypatch):
     from lipla.core import license_plate_recognizer
 
     monkeypatch.setattr(
@@ -170,16 +227,23 @@ def test_system_japanese_font_error_lists_attempted_fonts(monkeypatch):
     def font_not_found(_font_name, _font_size):
         raise OSError("font not found")
 
+    def fail_download(*_args, **_kwargs):
+        raise OSError("download failed")
+
+    monkeypatch.setattr(license_plate_recognizer.ImageFont, "truetype", font_not_found)
     monkeypatch.setattr(
-        license_plate_recognizer.ImageFont, "truetype", font_not_found
+        license_plate_recognizer,
+        "_load_fallback_japanese_font",
+        fail_download,
     )
 
     try:
         license_plate_recognizer._load_system_japanese_font(24)
     except OSError as error:
         assert "first.ttf, second.ttf" in str(error)
+        assert "ZenMaruGothic-Medium.ttf" in str(error)
     else:
-        raise AssertionError("missing system fonts must raise OSError")
+        raise AssertionError("font download failure must raise OSError")
 
 
 def _make_detection_result():

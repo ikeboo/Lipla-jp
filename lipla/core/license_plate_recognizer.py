@@ -39,8 +39,10 @@ from .pose_postprocessor import (
     suppress_duplicate_detections,
 )
 from .recognition_result import (
+    FALLBACK_JAPANESE_FONT_URL,
     SYSTEM_JAPANESE_FONT_CANDIDATES,
     LPDetResult,
+    _load_fallback_japanese_font,
     render_result_image,
 )
 
@@ -61,20 +63,24 @@ def _load_system_japanese_font(font_size: int) -> ImageFont.FreeTypeFont:
         最初に読み込みに成功したフォント。
 
     Raises:
-        OSError: 候補のフォントを1つも読み込めなかった場合。
+        OSError: システムフォントを読み込めず、フォールバック用フォントの
+            ダウンロードまたは読み込みにも失敗した場合。
     """
-    last_error: OSError | None = None
     for font_name in _SYSTEM_JAPANESE_FONT_CANDIDATES:
         try:
             return ImageFont.truetype(font_name, font_size)
-        except OSError as error:
-            last_error = error
+        except OSError:
+            pass
 
-    candidates = ", ".join(_SYSTEM_JAPANESE_FONT_CANDIDATES)
-    raise OSError(
-        "No Japanese-capable system font was found. "
-        f"Install a Japanese font such as Noto Sans CJK. Tried: {candidates}"
-    ) from last_error
+    try:
+        return _load_fallback_japanese_font(font_size, font_loader=ImageFont.truetype)
+    except OSError as error:
+        candidates = ", ".join(_SYSTEM_JAPANESE_FONT_CANDIDATES)
+        raise OSError(
+            "No Japanese-capable font could be loaded. "
+            f"Tried system fonts: {candidates}. "
+            f"Fallback URL: {FALLBACK_JAPANESE_FONT_URL}"
+        ) from error
 
 
 def _validate_bgr_image(image: np.ndarray) -> None:

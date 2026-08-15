@@ -2,9 +2,14 @@
 
 from __future__ import annotations
 
+import os
+import shutil
 import sys
+import tempfile
+import urllib.request
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import ClassVar, Protocol
 
 import cv2
@@ -12,6 +17,15 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
 from .image_processing import validate_bgr_image
+
+FALLBACK_JAPANESE_FONT_URL = (
+    "https://github.com/googlefonts/zen-marugothic/raw/refs/heads/main/"
+    "fonts/ttf/ZenMaruGothic-Medium.ttf"
+)
+FALLBACK_JAPANESE_FONT_FILENAME = "ZenMaruGothic-Medium.ttf"
+_FONT_CACHE_HOME = Path(os.environ.get("XDG_CACHE_HOME", Path.home() / ".cache"))
+FALLBACK_JAPANESE_FONT_CACHE_DIR = _FONT_CACHE_HOME / "lipla-jp" / "fonts"
+_FONT_DOWNLOAD_TIMEOUT_SECONDS = 30
 
 if sys.platform == "darwin":
     SYSTEM_JAPANESE_FONT_CANDIDATES = (
@@ -48,6 +62,63 @@ class _ResultView(Protocol):
     number: int
 
 
+def _download_fallback_japanese_font(font_path: Path) -> Path:
+    """GitHubからフォールバック用日本語フォントをキャッシュする。"""
+    temporary_path: Path | None = None
+    try:
+        font_path.parent.mkdir(parents=True, exist_ok=True)
+        request = urllib.request.Request(
+            FALLBACK_JAPANESE_FONT_URL,
+            headers={"User-Agent": "lipla-jp"},
+        )
+        with tempfile.NamedTemporaryFile(
+            mode="wb",
+            dir=font_path.parent,
+            prefix=f".{font_path.name}.",
+            suffix=".tmp",
+            delete=False,
+        ) as temporary_file:
+            temporary_path = Path(temporary_file.name)
+            with urllib.request.urlopen(
+                request, timeout=_FONT_DOWNLOAD_TIMEOUT_SECONDS
+            ) as response:
+                shutil.copyfileobj(response, temporary_file)
+
+        if temporary_path.stat().st_size == 0:
+            raise OSError("downloaded font file is empty")
+        temporary_path.replace(font_path)
+    except OSError as error:
+        raise OSError(
+            "Failed to download the fallback Japanese font from "
+            f"{FALLBACK_JAPANESE_FONT_URL}"
+        ) from error
+    finally:
+        if temporary_path is not None:
+            temporary_path.unlink(missing_ok=True)
+    return font_path
+
+
+def _load_fallback_japanese_font(
+    font_size: int,
+    *,
+    font_loader: Callable[[str | Path, int], ImageFont.FreeTypeFont],
+) -> ImageFont.FreeTypeFont:
+    """キャッシュ済み、またはダウンロードした日本語フォントを読み込む。"""
+    font_path = FALLBACK_JAPANESE_FONT_CACHE_DIR / FALLBACK_JAPANESE_FONT_FILENAME
+    if font_path.is_file():
+        try:
+            return font_loader(font_path, font_size)
+        except OSError:
+            font_path.unlink(missing_ok=True)
+
+    _download_fallback_japanese_font(font_path)
+    try:
+        return font_loader(font_path, font_size)
+    except OSError as error:
+        font_path.unlink(missing_ok=True)
+        raise OSError(f"Downloaded fallback font is invalid: {font_path}") from error
+
+
 def load_system_japanese_font(
     font_size: int,
     candidates: Sequence[str] = SYSTEM_JAPANESE_FONT_CANDIDATES,
@@ -62,20 +133,24 @@ def load_system_japanese_font(
         最初に読み込みに成功したフォント。
 
     Raises:
-        OSError: 候補のフォントを1つも読み込めなかった場合。
+        OSError: システムフォントを読み込めず、フォールバック用フォントの
+            ダウンロードまたは読み込みにも失敗した場合。
     """
-    last_error: OSError | None = None
     for font_name in candidates:
         try:
             return ImageFont.truetype(font_name, font_size)
-        except OSError as error:
-            last_error = error
+        except OSError:
+            pass
 
-    names = ", ".join(candidates)
-    raise OSError(
-        "No Japanese-capable system font was found. "
-        f"Install a Japanese font such as Noto Sans CJK. Tried: {names}"
-    ) from last_error
+    try:
+        return _load_fallback_japanese_font(font_size, font_loader=ImageFont.truetype)
+    except OSError as error:
+        names = ", ".join(candidates)
+        raise OSError(
+            "No Japanese-capable font could be loaded. "
+            f"Tried system fonts: {names}. "
+            f"Fallback URL: {FALLBACK_JAPANESE_FONT_URL}"
+        ) from error
 
 
 def render_result_image(
