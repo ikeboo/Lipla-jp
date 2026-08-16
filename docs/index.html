@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Lipla-jp | 日本のナンバープレート認識 Pythonライブラリ</title>
+    <meta name="description" content="Lipla-jpは、日本の自動車ナンバープレートを高精度に検出・OCR認識するオープンソースのPythonライブラリです。ONNXベース、MITライセンスで商用利用にも対応。">
+    <meta name="keywords" content="ナンバープレート認識,日本,OCR,Python,画像認識,車両,ONNX,オープンソース,Lipla-jp">
+    <meta name="author" content="Lipla-jp contributors">
+    <meta name="robots" content="index, follow, max-image-preview:large">
+    <meta name="theme-color" content="#f5f3ed">
+    <link rel="canonical" href="https://ikeboo.github.io/Lipla-jp/">
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+    <link rel="manifest" href="site.webmanifest">
+    <link rel="stylesheet" href="styles.css">
+
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="ja_JP">
+    <meta property="og:site_name" content="Lipla-jp">
+    <meta property="og:title" content="Lipla-jp | 日本のナンバープレート認識を、Pythonで。">
+    <meta property="og:description" content="高精度・オープンソース・商用利用可能な日本のナンバープレート認識ライブラリ。">
+    <meta property="og:url" content="https://ikeboo.github.io/Lipla-jp/">
+    <meta property="og:image" content="https://ikeboo.github.io/Lipla-jp/assets/results.jpg">
+    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image:width" content="2258">
+    <meta property="og:image:height" content="944">
+    <meta property="og:image:alt" content="Lipla-jpによる日本のナンバープレート検出・認識結果">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareSourceCode",
+        "name": "Lipla-jp",
+        "alternateName": "日本のナンバープレート認識ライブラリ",
+        "description": "日本の自動車ナンバープレートを検出し、地名・分類番号・かな・一連指定番号をOCR認識するPythonライブラリ。",
+        "url": "https://ikeboo.github.io/Lipla-jp/",
+        "codeRepository": "https://github.com/ikeboo/Lipla-jp",
+        "downloadUrl": "https://github.com/ikeboo/Lipla-jp",
+        "programmingLanguage": "Python",
+        "runtimePlatform": "Python 3.11 or later",
+        "license": "https://opensource.org/license/mit",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Windows, macOS, Linux"
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Lipla-jpは商用利用できますか？",
+            "acceptedAnswer": {"@type": "Answer", "text": "はい。Lipla-jpはMITライセンスで公開されており、ライセンス条件の範囲で商用利用、改変、再配布が可能です。"}
+          },
+          {
+            "@type": "Question",
+            "name": "GPUは必要ですか？",
+            "acceptedAnswer": {"@type": "Answer", "text": "必須ではありません。ONNX Runtimeの実行プロバイダーを指定でき、CPU環境でも利用できます。"}
+          },
+          {
+            "@type": "Question",
+            "name": "どのような画像を入力できますか？",
+            "acceptedAnswer": {"@type": "Answer", "text": "画像ファイルのパス、またはOpenCVのBGR画像を入力できます。プレート幅が画像幅の1/10以上かつ1/4以下、100ピクセル以上の画像を推奨します。"}
+          }
+        ]
+      }
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">本文へスキップ</a>
+
+    <header class="site-header" aria-label="サイトヘッダー">
+      <a class="wordmark" href="#top" aria-label="Lipla-jp トップへ">
+        <span class="mark" aria-hidden="true"><i></i></span>
+        <span>Lipla<span class="accent">.</span>jp</span>
+      </a>
+      <nav class="nav" aria-label="メインナビゲーション">
+        <a href="#features">特長</a>
+        <a href="#quickstart">使い方</a>
+        <a href="#samples">サンプル</a>
+        <a href="#api">API</a>
+      </nav>
+      <a class="header-github" href="https://github.com/ikeboo/Lipla-jp" target="_blank" rel="noopener noreferrer">
+        GitHub <span aria-hidden="true">↗</span>
+      </a>
+    </header>
+
+    <main id="main">
+      <section class="hero" id="top" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <p class="eyebrow"><span></span> Open source / MIT license</p>
+          <h1 id="hero-title">日本のナンバープレート認識を、<em>Python</em>で。</h1>
+          <p class="hero-lead">検出、台形補正、OCRまでをひとつのAPIに。Lipla-jpは、日本の自動車ナンバープレートに特化した軽量な認識ライブラリです。</p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="#quickstart">3分で始める <span aria-hidden="true">→</span></a>
+            <a class="button button-quiet" href="https://huggingface.co/spaces/bukuroo/Lipla" target="_blank" rel="noopener noreferrer">ブラウザで試す <span aria-hidden="true">↗</span></a>
+          </div>
+          <dl class="hero-facts" aria-label="プロジェクト概要">
+            <div><dt>License</dt><dd>MIT</dd></div>
+            <div><dt>Runtime</dt><dd>ONNX</dd></div>
+            <div><dt>Python</dt><dd>3.11+</dd></div>
+          </dl>
+        </div>
+
+        <div class="hero-visual" aria-label="ナンバープレート認識のコード例">
+          <div class="scan-frame" aria-hidden="true">
+            <span class="corner corner-tl"></span><span class="corner corner-tr"></span>
+            <span class="corner corner-bl"></span><span class="corner corner-br"></span>
+            <div class="plate">
+              <span class="plate-area">品川 300</span>
+              <span class="plate-kana">あ</span>
+              <strong>12-34</strong>
+            </div>
+            <span class="scan-line"></span>
+          </div>
+          <div class="result-chip"><span></span> recognized <strong>98.7%</strong></div>
+          <div class="code-card">
+            <div class="code-head"><span>recognize.py</span><button class="copy-button" type="button" data-copy="hero-code" aria-label="コードをコピー">Copy</button></div>
+            <pre id="hero-code"><code><span class="kw">import</span> lipla
+
+rec = lipla.<span class="fn">Recognizer</span>()
+results = rec(<span class="str">"car.jpg"</span>)
+<span class="cm"># → 品川 300 あ 12-34</span></code></pre>
+          </div>
+        </div>
+      </section>
+
+      <div class="ticker" aria-hidden="true">
+        <div><span>DETECT</span><i>◆</i><span>NORMALIZE</span><i>◆</i><span>RECOGNIZE</span><i>◆</i><span>STRUCTURE</span><i>◆</i><span>DETECT</span><i>◆</i><span>NORMALIZE</span><i>◆</i><span>RECOGNIZE</span></div>
+      </div>
+
+      <section class="section features" id="features" aria-labelledby="features-title">
+        <div class="section-heading">
+          <p class="section-number">01 / FEATURES</p>
+          <h2 id="features-title">認識に必要なすべてを、<br>ひとつのパイプラインに。</h2>
+          <p>複雑な前処理を意識せず、画像を渡すだけ。検出結果は扱いやすいPythonオブジェクトで返ります。</p>
+        </div>
+        <div class="feature-grid">
+          <article class="feature-card feature-card-blue">
+            <span class="feature-index">01</span>
+            <div class="feature-icon" aria-hidden="true">⌗</div>
+            <h3>日本のプレートに特化</h3>
+            <p>地名、分類番号、かな、一連指定番号を項目ごとに構造化。一般OCRの後処理を減らします。</p>
+          </article>
+          <article class="feature-card">
+            <span class="feature-index">02</span>
+            <div class="feature-icon" aria-hidden="true">◇</div>
+            <h3>傾きまで自動補正</h3>
+            <p>4頂点を検出して射影補正。斜めから撮影したナンバープレートも読み取りやすい形に整えます。</p>
+          </article>
+          <article class="feature-card feature-card-dark">
+            <span class="feature-index">03</span>
+            <div class="feature-icon" aria-hidden="true">↯</div>
+            <h3>ONNXで軽量に動作</h3>
+            <p>PyTorchに依存せず、ONNX Runtimeで推論。CPUから各種実行プロバイダーまで選択できます。</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section quickstart" id="quickstart" aria-labelledby="quickstart-title">
+        <div class="section-heading light-heading">
+          <p class="section-number">02 / QUICK START</p>
+          <h2 id="quickstart-title">3ステップで、認識開始。</h2>
+          <p>初回実行時のみ、Hugging Faceからモデルウェイトを自動でダウンロードします。</p>
+        </div>
+        <div class="steps">
+          <article class="step">
+            <div class="step-head"><span>1</span><h3>インストール</h3></div>
+            <div class="code-block">
+              <button class="copy-button" type="button" data-copy="install-code" aria-label="インストールコマンドをコピー">Copy</button>
+              <pre id="install-code"><code>pip install git+https://github.com/ikeboo/Lipla-jp.git</code></pre>
+            </div>
+          </article>
+          <article class="step">
+            <div class="step-head"><span>2</span><h3>画像を認識</h3></div>
+            <div class="code-block">
+              <button class="copy-button" type="button" data-copy="recognize-code" aria-label="認識コードをコピー">Copy</button>
+              <pre id="recognize-code"><code><span class="kw">import</span> lipla
+
+recognizer = lipla.<span class="fn">Recognizer</span>()
+results = recognizer(<span class="str">"car.jpg"</span>)</code></pre>
+            </div>
+          </article>
+          <article class="step">
+            <div class="step-head"><span>3</span><h3>結果を利用</h3></div>
+            <div class="code-block">
+              <button class="copy-button" type="button" data-copy="result-code" aria-label="結果取得コードをコピー">Copy</button>
+              <pre id="result-code"><code>result = results[<span class="num">0</span>]
+<span class="fn">print</span>(result.area)         <span class="cm"># 品川</span>
+<span class="fn">print</span>(result.class_number) <span class="cm"># 300</span>
+<span class="fn">print</span>(result.kana)         <span class="cm"># あ</span>
+<span class="fn">print</span>(result.number)       <span class="cm"># 1234</span></code></pre>
+            </div>
+          </article>
+        </div>
+        <aside class="tip" aria-label="画像入力のヒント"><span>TIP</span><p>入力は<strong>画像パス</strong>または<strong>OpenCV BGR画像</strong>。プレート幅が画像幅の1/10〜1/4、100px以上だと認識しやすくなります。</p></aside>
+      </section>
+
+      <section class="section samples" id="samples" aria-labelledby="samples-title">
+        <div class="section-heading row-heading">
+          <div>
+            <p class="section-number">03 / SAMPLE</p>
+            <h2 id="samples-title">入力から、構造化データへ。</h2>
+          </div>
+          <p>普通車、軽自動車、事業用プレートなど、複数タイプの検出・認識に対応します。</p>
+        </div>
+        <figure class="sample-figure">
+          <img src="assets/results.jpg" width="2258" height="944" loading="lazy" alt="4台の車からナンバープレートを検出し、世田谷・鳥取・大阪・堺の文字と番号を認識したLipla-jpの実行例">
+          <figcaption><span>DEMO OUTPUT</span> 検出領域と、補正・認識されたナンバープレート</figcaption>
+        </figure>
+        <div class="sample-output">
+          <div>
+            <p class="output-label">RESULT / 01</p>
+            <p class="plate-text">世田谷 <strong>999</strong><br><span>あ</span> 12-34</p>
+          </div>
+          <pre><code>{
+  <span class="json-key">"area"</span>: <span class="str">"世田谷"</span>,
+  <span class="json-key">"class_number"</span>: <span class="str">"999"</span>,
+  <span class="json-key">"kana"</span>: <span class="str">"あ"</span>,
+  <span class="json-key">"number"</span>: <span class="num">1234</span>,
+  <span class="json-key">"score"</span>: <span class="num">0.987</span>
+}</code></pre>
+        </div>
+      </section>
+
+      <section class="section api" id="api" aria-labelledby="api-title">
+        <div class="section-heading row-heading">
+          <div>
+            <p class="section-number">04 / API REFERENCE</p>
+            <h2 id="api-title">小さく、予測しやすいAPI。</h2>
+          </div>
+          <p>公開インターフェースは <code>Recognizer</code> と <code>LPDetResult</code>。まずはこの2つだけで使い始められます。</p>
+        </div>
+
+        <div class="api-layout">
+          <aside class="api-nav" aria-label="API内ナビゲーション">
+            <p>CONTENTS</p>
+            <a href="#recognizer-api"><span>01</span> Recognizer</a>
+            <a href="#result-api"><span>02</span> LPDetResult</a>
+            <a href="#methods-api"><span>03</span> Methods</a>
+          </aside>
+          <div class="api-content">
+            <article class="api-entry" id="recognizer-api">
+              <p class="api-kind">CLASS</p>
+              <h3>lipla.<strong>Recognizer</strong></h3>
+              <p>ナンバープレートの検出・補正・OCRを行うメインクラス。引数なしで既定モデルを利用できます。</p>
+              <div class="signature"><code>Recognizer(pose_model_path=None, ocr_det_model_path=None, ocr_rec_model_path=None, *, det_thresh=0.7, ...)</code></div>
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>パラメータ</th><th>型 / 既定値</th><th>説明</th></tr></thead>
+                  <tbody>
+                    <tr><td><code>*_model_path</code></td><td><code>str | Path | None</code></td><td>各ONNXモデルのパス。未指定時は自動取得</td></tr>
+                    <tr><td><code>det_thresh</code></td><td><code>float = 0.7</code></td><td>プレート検出の信頼度しきい値</td></tr>
+                    <tr><td><code>providers</code></td><td><code>list[str] | None</code></td><td>ONNX Runtimeの実行プロバイダー</td></tr>
+                    <tr><td><code>cache_dir</code></td><td><code>str | Path | None</code></td><td>モデルのキャッシュ先</td></tr>
+                    <tr><td><code>local_files_only</code></td><td><code>bool = False</code></td><td>ローカルキャッシュだけを使用</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="callout"><code>recognizer(image)</code><span>→</span><code>list[LPDetResult]</code></div>
+            </article>
+
+            <article class="api-entry" id="result-api">
+              <p class="api-kind">DATA CLASS</p>
+              <h3>lipla.<strong>LPDetResult</strong></h3>
+              <p>1枚のプレートについて、認識文字・信頼度・各種画像を保持する結果オブジェクトです。</p>
+              <div class="property-grid">
+                <div><code>area</code><span>地域名</span><b>str</b></div>
+                <div><code>class_number</code><span>分類番号</span><b>str</b></div>
+                <div><code>kana</code><span>用途のかな</span><b>str</b></div>
+                <div><code>number</code><span>一連指定番号</span><b>int</b></div>
+                <div><code>score</code><span>検出信頼度</span><b>float</b></div>
+                <div><code>vertices</code><span>プレート4頂点</span><b>ndarray</b></div>
+                <div><code>plate_image</code><span>補正済み画像</span><b>ndarray</b></div>
+                <div><code>original_image</code><span>入力元画像</span><b>ndarray</b></div>
+              </div>
+              <p class="api-note">各文字フィールドには <code>area_score</code>、<code>class_number_score</code>、<code>kana_score</code>、<code>number_score</code> もあります。</p>
+            </article>
+
+            <article class="api-entry" id="methods-api">
+              <p class="api-kind">PROPERTIES &amp; METHOD</p>
+              <h3>結果の画像化</h3>
+              <div class="method-list">
+                <div><code>result.det_image</code><p>検出位置を囲んだ入力画像を返します。</p><b>ndarray</b></div>
+                <div><code>result.result_image</code><p>補正済みプレートと認識文字の画像を返します。</p><b>ndarray</b></div>
+                <div><code>result.visualize()</code><p>検出画像と認識結果をMatplotlibで並べて表示します。</p><b>None</b></div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section faq" id="faq" aria-labelledby="faq-title">
+        <div class="section-heading">
+          <p class="section-number">05 / FAQ</p>
+          <h2 id="faq-title">よくある質問。</h2>
+        </div>
+        <div class="faq-list">
+          <details>
+            <summary>Lipla-jpは商用利用できますか？<span aria-hidden="true">＋</span></summary>
+            <p>はい。MITライセンスで公開されており、ライセンス条件の範囲で商用利用、改変、再配布が可能です。</p>
+          </details>
+          <details>
+            <summary>GPUは必要ですか？<span aria-hidden="true">＋</span></summary>
+            <p>必須ではありません。ONNX Runtimeの実行プロバイダーを指定でき、CPU環境でも利用できます。</p>
+          </details>
+          <details>
+            <summary>どのような画像を入力できますか？<span aria-hidden="true">＋</span></summary>
+            <p>画像ファイルのパス、またはOpenCVのBGR画像を入力できます。プレート幅が画像幅の1/10〜1/4、100ピクセル以上の画像を推奨します。</p>
+          </details>
+        </div>
+      </section>
+
+      <section class="cta" aria-labelledby="cta-title">
+        <div class="cta-mark" aria-hidden="true"><span></span></div>
+        <div>
+          <p>READY TO RECOGNIZE?</p>
+          <h2 id="cta-title">次の画像から、<br>読み取ってみよう。</h2>
+        </div>
+        <div class="cta-actions">
+          <a class="button button-white" href="https://github.com/ikeboo/Lipla-jp" target="_blank" rel="noopener noreferrer">GitHubで始める <span aria-hidden="true">↗</span></a>
+          <a href="https://huggingface.co/spaces/bukuroo/Lipla" target="_blank" rel="noopener noreferrer">デモを開く →</a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <a class="wordmark" href="#top"><span class="mark" aria-hidden="true"><i></i></span><span>Lipla<span class="accent">.</span>jp</span></a>
+      <p>Japanese license plate recognition library.</p>
+      <div>
+        <a href="https://github.com/ikeboo/Lipla-jp" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <a href="https://huggingface.co/bukuroo/Lipla-jp" target="_blank" rel="noopener noreferrer">Models</a>
+        <a href="https://github.com/ikeboo/Lipla-jp/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">MIT License</a>
+      </div>
+      <small>© 2026 Lipla-jp contributors.</small>
+    </footer>
+
+    <script src="script.js" defer></script>
+  </body>
+</html>
