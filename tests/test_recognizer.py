@@ -81,6 +81,53 @@ def test_recognizer_passes_detection_threshold_to_ecpose(monkeypatch):
     assert _PoseModel.calls[0][1]["thresh"] == 0.85
 
 
+def test_recognizer_stores_ocr_threshold(monkeypatch):
+    import lipla
+    from lipla.core import license_plate_recognizer
+
+    monkeypatch.setattr(license_plate_recognizer, "ECPose", _PoseModel)
+    monkeypatch.setattr(license_plate_recognizer, "PPOCR", _OCRModel)
+
+    assert lipla.Recognizer().ocr_thresh == 0.5
+    assert lipla.Recognizer(ocr_thresh=0.75).ocr_thresh == 0.75
+
+
+def test_recognizer_excludes_result_when_all_ocr_scores_are_below_threshold(
+    monkeypatch,
+):
+    from lipla.core import license_plate_recognizer
+
+    recognizer = object.__new__(license_plate_recognizer.Recognizer)
+    recognizer.ocr_thresh = 0.5
+    recognizer.pose_model = lambda _image: SimpleNamespace(
+        kpts=[[0, 0, 0, 1, 1, 1, 1, 0]] * 3,
+        scores=[0.9, 0.8, 0.7],
+        class_names=["private"] * 3,
+    )
+    below = _make_detection_result()
+    below.area_score = 0.49
+    below.class_number_score = 0.4
+    below.kana_score = 0.3
+    below.number_score = 0.2
+    equal = _make_detection_result()
+    equal.area_score = 0.5
+    mixed = _make_detection_result()
+    mixed.number_score = 0.6
+    results = iter((below, equal, mixed))
+    monkeypatch.setattr(
+        recognizer, "_recognize_detection", lambda *_args: next(results)
+    )
+    monkeypatch.setattr(
+        license_plate_recognizer,
+        "suppress_duplicate_detections",
+        lambda detections: detections,
+    )
+
+    actual = recognizer(np.zeros((4, 4, 3), dtype=np.uint8))
+
+    assert actual == [equal, mixed]
+
+
 def test_recognizer_adds_new_area_names_to_ocr_and_vocabulary(monkeypatch):
     import lipla
     from lipla.core import license_plate_recognizer
