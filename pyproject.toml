@@ -14,9 +14,14 @@ dependencies = [
     "opencv-python>=4.9.0.80",
     "pillow>=10.2.0",
     "matplotlib>=3.8.2",
-    "onnxruntime>=1.17.0",
+    "onnxruntime>=1.24.4",
     "shapely>=2.0.3",
     "pyyaml>=6.0.1"
+]
+
+[project.optional-dependencies]
+webgpu = [
+    "onnxruntime-ep-webgpu>=0.1.0",
 ]
 
 [dependency-groups]

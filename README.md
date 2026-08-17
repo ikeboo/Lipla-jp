@@ -12,7 +12,10 @@
 - セットアップ  
     ```sh
     pip install git+https://github.com/ikeboo/Lipla-jp.git
+    # 高速化オプション
+    pip install onnxruntime-ep-webgpu
     ```
+　　 WebGPU利用時の推論高速化　x3.8 ＠Corei5-1235U, x1.8 @M5Pro
 
 - 検出実行  
   初回のみ[モデルウェイト](https://huggingface.co/bukuroo/Lipla-jp)が自動ダウンロードされます。
