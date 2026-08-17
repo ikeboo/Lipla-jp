@@ -1,8 +1,8 @@
 <div align="center">
-<img src="samples/logo.png">
-<img src="samples/results.jpg">
+<img src="https://raw.githubusercontent.com/ikeboo/Lipla-jp/main/samples/logo.png">
+<img src="https://raw.githubusercontent.com/ikeboo/Lipla-jp/main/samples/results.jpg">
 </div>
-<p align="center"><a href="https://github.com/ikeboo/Lipla-jp"><img src="https://img.shields.io/badge/GitHub-Lipla--jp-181717?logo=github&amp;logoColor=white" alt="GitHub"></a> <a href="https://huggingface.co/bukuroo/Lipla-jp"><img src="https://img.shields.io/badge/Hugging%20Face-Lipla--jp-FFD21E?logo=huggingface" alt="Hugging Face"></a> <a href="https://huggingface.co/spaces/bukuroo/Lipla"><img src="https://img.shields.io/badge/Hugging%20Face-Spaces-FFD21E?logo=huggingface" alt="Hugging Face Spaces"></a> <a href="https://colab.research.google.com/drive/1YUG36Q8kpGtsolwp0ZfqqitfIhmMBZ1E?usp=sharing"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"></a> <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT License"></a></p>
+<p align="center"><a href="https://pypi.org/project/lipla-jp/"><img src="https://img.shields.io/pypi/v/lipla-jp" alt="PyPI"></a> <a href="https://github.com/ikeboo/Lipla-jp"><img src="https://img.shields.io/badge/GitHub-Lipla--jp-181717?logo=github&amp;logoColor=white" alt="GitHub"></a> <a href="https://huggingface.co/bukuroo/Lipla-jp"><img src="https://img.shields.io/badge/Hugging%20Face-Lipla--jp-FFD21E?logo=huggingface" alt="Hugging Face"></a> <a href="https://huggingface.co/spaces/bukuroo/Lipla"><img src="https://img.shields.io/badge/Hugging%20Face-Spaces-FFD21E?logo=huggingface" alt="Hugging Face Spaces"></a> <a href="https://colab.research.google.com/drive/1YUG36Q8kpGtsolwp0ZfqqitfIhmMBZ1E?usp=sharing"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"></a> <a href="https://github.com/ikeboo/Lipla-jp/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT License"></a></p>
 
 ### 🖐️ What's Lipla?
 日本の自動車ナンバープレート認識用Pythonライブラリ。  
@@ -11,9 +11,9 @@
 ### ⚡️ Quick Start
 - セットアップ  
     ```sh
-    pip install git+https://github.com/ikeboo/Lipla-jp.git
+    pip install lipla-jp
     # 高速化オプション
-    pip install onnxruntime-ep-webgpu
+    pip install "lipla-jp[webgpu]"
     ```
 　　 WebGPU利用時の推論高速化　x3.8 ＠Corei5-1235U, x1.8 @M5Pro
 
