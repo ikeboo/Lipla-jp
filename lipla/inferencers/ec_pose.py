@@ -13,6 +13,7 @@ import cv2
 import numpy as np
 import onnxruntime as ort
 
+from .execution_provider import create_inference_session
 from .model_loader import (
     ECPOSE_MODEL_FILENAME,
     MODEL_REVISION,
@@ -126,9 +127,10 @@ class ECPose:
         session_options.graph_optimization_level = (
             ort.GraphOptimizationLevel.ORT_ENABLE_ALL
         )
-        session_kwargs = {} if providers is None else {"providers": providers}
-        self.session = ort.InferenceSession(
-            str(onnx_path), session_options, **session_kwargs
+        self.session = create_inference_session(
+            str(onnx_path),
+            providers=providers,
+            session_options=session_options,
         )
         self.thresh = float(thresh)
         metadata = self._model_metadata()

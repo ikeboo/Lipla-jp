@@ -122,6 +122,7 @@ class Recognizer:
         ocr_det_model_path: PPOCR検出ONNXモデルのパス。
         ocr_rec_model_path: PPOCR認識ONNXモデルのパス。
         det_thresh: プレート検出の信頼度しきい値。
+        ocr_thresh: OCRの4項目すべてがこの値未満の結果を除外するしきい値。
         ocr_dict_path: PPOCR文字辞書のパス。
         new_area_names: 新規地名のリスト。(新規地名が発行された際に利用)
         providers: ONNX Runtimeの実行プロバイダー。
@@ -139,6 +140,7 @@ class Recognizer:
         ocr_rec_model_path: str | Path | None = None,
         *,
         det_thresh: float = 0.7,
+        ocr_thresh: float = 0.5,
         ocr_dict_path: str | Path | None = None,
         new_area_names: list[str] | None = None,
         providers: list[str] | None = None,
@@ -146,6 +148,7 @@ class Recognizer:
         revision: str = MODEL_REVISION,
         local_files_only: bool = False,
     ) -> None:
+        self.ocr_thresh = ocr_thresh
         characters_path = (
             Path(__file__).resolve().parents[1] / "configs" / "characters.yml"
         )
@@ -225,7 +228,15 @@ class Recognizer:
             result = self._recognize_detection(
                 image, raw_vertices, det_score, class_name
             )
-            if result is not None:
+            if result is not None and not all(
+                score < self.ocr_thresh
+                for score in (
+                    result.area_score,
+                    result.class_number_score,
+                    result.kana_score,
+                    result.number_score,
+                )
+            ):
                 results.append(result)
         return results
 

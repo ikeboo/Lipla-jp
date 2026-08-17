@@ -7,11 +7,11 @@ from pathlib import Path
 
 import cv2
 import numpy as np
-import onnxruntime as ort
 import yaml
 from shapely import BufferJoinStyle
 from shapely.geometry import Polygon
 
+from .execution_provider import create_inference_session
 from .model_loader import (
     MODEL_REVISION,
     PPOCR_DET_MODEL_FILENAME,
@@ -597,9 +597,12 @@ class PPOCR:
                 Path(__file__).resolve().parents[1] / "configs" / "characters.yml"
             )
 
-        session_kwargs = {} if providers is None else {"providers": providers}
-        self.det_session = ort.InferenceSession(str(det_model_path), **session_kwargs)
-        self.rec_session = ort.InferenceSession(str(rec_model_path), **session_kwargs)
+        self.det_session = create_inference_session(
+            str(det_model_path), providers=providers
+        )
+        self.rec_session = create_inference_session(
+            str(rec_model_path), providers=providers
+        )
         det_inputs = self.det_session.get_inputs()
         rec_inputs = self.rec_session.get_inputs()
         if not det_inputs or not rec_inputs:

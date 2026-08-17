@@ -4,20 +4,36 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "lipla-jp"
-version = "0.1.0"
-description = "License plate recognition"
+version = "0.2.0"
+description = "Japanese license plate recognition"
 readme = "README.md"
 requires-python = ">=3.11"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [
+    { name = "ikeboo" },
+]
+keywords = ["license-plate-recognition", "ocr", "onnx", "japan"]
 dependencies = [
     "huggingface-hub>=0.20.3,<2",
     "numpy>=1.26.4",
     "opencv-python>=4.9.0.80",
     "pillow>=10.2.0",
     "matplotlib>=3.8.2",
-    "onnxruntime>=1.17.0",
+    "onnxruntime>=1.24.4",
     "shapely>=2.0.3",
     "pyyaml>=6.0.1"
 ]
+
+[project.optional-dependencies]
+webgpu = [
+    "onnxruntime-ep-webgpu>=0.1.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/ikeboo/Lipla-jp"
+Repository = "https://github.com/ikeboo/Lipla-jp"
+Issues = "https://github.com/ikeboo/Lipla-jp/issues"
 
 [dependency-groups]
 dev = [

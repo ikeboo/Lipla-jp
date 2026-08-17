@@ -78,7 +78,7 @@ def test_ecpose_downloads_default_model(monkeypatch, tmp_path):
         lambda filename, **kwargs: calls.append((filename, kwargs))
         or model_path,
     )
-    monkeypatch.setattr(ec_pose.ort, "InferenceSession", _PoseSession)
+    monkeypatch.setattr(ec_pose, "create_inference_session", _PoseSession)
 
     inferencer = ec_pose.ECPose()
 
@@ -120,7 +120,7 @@ def test_ppocr_downloads_unspecified_assets(monkeypatch, tmp_path):
         return tmp_path / filename
 
     monkeypatch.setattr(ppocr, "download_model_file", fake_download)
-    monkeypatch.setattr(ppocr.ort, "InferenceSession", _OCRSession)
+    monkeypatch.setattr(ppocr, "create_inference_session", _OCRSession)
     monkeypatch.setattr(ppocr, "CTCDecoder", _Decoder)
 
     inferencer = ppocr.PPOCR()
@@ -150,7 +150,7 @@ def test_explicit_model_paths_do_not_download(monkeypatch, tmp_path):
         raise AssertionError("download should not be called")
 
     monkeypatch.setattr(ppocr, "download_model_file", fail_download)
-    monkeypatch.setattr(ppocr.ort, "InferenceSession", _OCRSession)
+    monkeypatch.setattr(ppocr, "create_inference_session", _OCRSession)
     monkeypatch.setattr(ppocr, "CTCDecoder", _Decoder)
 
     ppocr.PPOCR(
@@ -164,7 +164,7 @@ def test_explicit_model_paths_do_not_download(monkeypatch, tmp_path):
 def test_ppocr_passes_new_area_names_to_decoder(monkeypatch, tmp_path):
     from lipla.inferencers import ppocr
 
-    monkeypatch.setattr(ppocr.ort, "InferenceSession", _OCRSession)
+    monkeypatch.setattr(ppocr, "create_inference_session", _OCRSession)
     monkeypatch.setattr(ppocr, "CTCDecoder", _Decoder)
 
     inferencer = ppocr.PPOCR(
