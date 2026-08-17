@@ -11,7 +11,7 @@ from typing import Any
 import numpy as np
 import spaces
 
-from lipla import LPDetResult, Recognizer
+from lipla import Recognizer, Result
 
 _IMAGE_FIELD_NAMES = frozenset(
     {"plate_image", "original_image", "_det_image", "_result_image"}
@@ -39,8 +39,8 @@ def _json_compatible(value: Any) -> Any:
     return value
 
 
-def result_to_dict(result: LPDetResult) -> dict[str, Any]:
-    """LPDetResultから画像フィールドを除いたJSON用データを作る。"""
+def result_to_dict(result: Result) -> dict[str, Any]:
+    """Resultから画像フィールドを除いたJSON用データを作る。"""
     return {
         field.name: _json_compatible(getattr(result, field.name))
         for field in fields(result)
@@ -76,11 +76,11 @@ def recognize_image(
     bgr_image = _bgr_to_rgb(image)
     results = recognizer_factory()(bgr_image)
     det_images = [
-        (_bgr_to_rgb(result.det_image), f"LPDetResult[{index}]")
+        (_bgr_to_rgb(result.det_image), f"Result[{index}]")
         for index, result in enumerate(results)
     ]
     result_images = [
-        (_bgr_to_rgb(result.result_image), f"LPDetResult[{index}]")
+        (_bgr_to_rgb(result.result_image), f"Result[{index}]")
         for index, result in enumerate(results)
     ]
     result_json = json.dumps(

@@ -19,8 +19,8 @@ preload_from_hub:
 
 画像をドロップすると、日本の自動車ナンバープレートを検出・認識します。
 
-- `LPDetResult.det_image` と `LPDetResult.result_image` をギャラリー表示します。
-- `LPDetResult` の画像以外のフィールドをJSONテキストで表示します。
+- `Result.det_image` と `Result.result_image` をギャラリー表示します。
+- `Result` の画像以外のフィールドをJSONテキストで表示します。
 - 複数のナンバープレートを検出した場合は、結果を検出順に表示します。
 
 このディレクトリの内容をHugging Face Spaceリポジトリのルートへ配置して

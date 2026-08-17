@@ -41,7 +41,7 @@ from .pose_postprocessor import (
 from .recognition_result import (
     FALLBACK_JAPANESE_FONT_URL,
     SYSTEM_JAPANESE_FONT_CANDIDATES,
-    LPDetResult,
+    Result,
     _load_fallback_japanese_font,
     render_result_image,
 )
@@ -92,7 +92,7 @@ def _validate_bgr_image(image: np.ndarray) -> None:
     validate_bgr_image(image)
 
 
-def _create_result_image(result: LPDetResult) -> np.ndarray:
+def _create_result_image(result: Result) -> np.ndarray:
     """プレートと認識文字列を1枚のBGR画像へ描画する。
 
     Args:
@@ -104,8 +104,8 @@ def _create_result_image(result: LPDetResult) -> np.ndarray:
     return render_result_image(result, font_loader=_load_system_japanese_font)
 
 
-# 旧モジュールのフォント差し替えをLPDetResultにも反映する互換設定。
-LPDetResult._font_loader = staticmethod(
+# 旧モジュールのフォント差し替えをResultにも反映する互換設定。
+Result._font_loader = staticmethod(
     lambda font_size: _load_system_japanese_font(font_size)
 )
 
@@ -183,7 +183,7 @@ class Recognizer:
         self.field_recognizer = FixedFieldRecognizer(self.ocr_model, self.ocr_parser)
         self._area_tokens = self.field_recognizer.area_tokens
 
-    def __call__(self, image: np.ndarray | str | Path) -> list[LPDetResult]:
+    def __call__(self, image: np.ndarray | str | Path) -> list[Result]:
         """画像内の全ナンバープレートを認識する。
 
         Args:
@@ -218,7 +218,7 @@ class Recognizer:
                 pose_result.class_names,
             )
         )
-        results: list[LPDetResult] = []
+        results: list[Result] = []
         for raw_vertices, det_score, class_name in suppress_duplicate_detections(
             detections
         ):
@@ -235,7 +235,7 @@ class Recognizer:
         raw_vertices: list[float],
         detection_score: float,
         class_name: str,
-    ) -> LPDetResult | None:
+    ) -> Result | None:
         vertices = np.asarray(raw_vertices, dtype=np.float32).reshape(-1, 2)
         if vertices.shape != (4, 2) or not np.all(np.isfinite(vertices)):
             return None
@@ -280,7 +280,7 @@ class Recognizer:
         field_candidates: Mapping[str, Iterable[TextCandidate]] | None = None,
         padding: int = 0,
         spatial_fields: Iterable[str] | None = None,
-    ) -> LPDetResult:
+    ) -> Result:
         """OCR結果を4項目へ解析して認識結果を構築する。
 
         画像や頂点に関するキーワード引数を省略できるため、OCR結果だけを
@@ -317,7 +317,7 @@ class Recognizer:
             if vertices is not None
             else np.zeros((4, 2), dtype=np.float32)
         )
-        return LPDetResult(
+        return Result(
             vertices=result_vertices,
             score=float(detection_score),
             plate_image=plate_image,
@@ -333,7 +333,7 @@ class Recognizer:
             number_score=fields.number.score,
         )
 
-    def create_result_images(self, results: list[LPDetResult]) -> list[np.ndarray]:
+    def create_result_images(self, results: list[Result]) -> list[np.ndarray]:
         """各認識結果の表示用画像を作成する。
 
         Args:

@@ -202,9 +202,9 @@ results = recognizer(<span class="str">"car.jpg"</span>)</code></pre>
         <div class="section-heading row-heading">
           <div>
             <p class="section-number">03 / SAMPLE</p>
-            <h2 id="samples-title">入力から、構造化データへ。</h2>
+            <h2 id="samples-title">認識結果を精査する。</h2>
           </div>
-          <p>普通車、軽自動車、事業用プレートなど、複数タイプの検出・認識に対応します。</p>
+          <p>結果は構造化データだけでなく、わかりやすく視覚化された画像としても取得可能です。</p>
         </div>
         <figure class="sample-figure">
           <img src="assets/results.jpg" width="2258" height="944" loading="lazy" alt="4台の車からナンバープレートを検出し、世田谷・鳥取・大阪・堺の文字と番号を認識したLipla-jpの実行例">
@@ -231,14 +231,14 @@ results = recognizer(<span class="str">"car.jpg"</span>)</code></pre>
             <p class="section-number">04 / API REFERENCE</p>
             <h2 id="api-title">迷わない、シンプルなAPI。</h2>
           </div>
-          <p>公開インターフェースは <code>Recognizer</code> と <code>LPDetResult</code>。まずはこの2つだけで使い始められます。</p>
+          <p>公開インターフェースは <code>Recognizer</code> と <code>Result</code>。まずはこの2つだけで使い始められます。</p>
         </div>
 
         <div class="api-layout">
           <aside class="api-nav" aria-label="API内ナビゲーション">
             <p>CONTENTS</p>
             <a href="#recognizer-api"><span>01</span> Recognizer</a>
-            <a href="#result-api"><span>02</span> LPDetResult</a>
+            <a href="#result-api"><span>02</span> Result</a>
             <a href="#methods-api"><span>03</span> Methods</a>
           </aside>
           <div class="api-content">
@@ -259,12 +259,12 @@ results = recognizer(<span class="str">"car.jpg"</span>)</code></pre>
                   </tbody>
                 </table>
               </div>
-              <div class="callout"><code>recognizer(image)</code><span>→</span><code>list[LPDetResult]</code></div>
+              <div class="callout"><code>recognizer(image)</code><span>→</span><code>list[Result]</code></div>
             </article>
 
             <article class="api-entry" id="result-api">
               <p class="api-kind">DATA CLASS</p>
-              <h3>lipla.<strong>LPDetResult</strong></h3>
+              <h3>lipla.<strong>Result</strong></h3>
               <p>1枚のプレートについて、認識文字・信頼度・各種画像を保持する結果オブジェクトです。</p>
               <div class="property-grid">
                 <div><code>area</code><span>地域名</span><b>str</b></div>

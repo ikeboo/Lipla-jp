@@ -2,11 +2,11 @@ import numpy as np
 import pytest
 from PIL import ImageFont
 
-from lipla.core.recognition_result import LPDetResult, render_result_image
+from lipla.core.recognition_result import Result, render_result_image
 
 
 def _result():
-    return LPDetResult(
+    return Result(
         vertices=np.array([[1, 1], [1, 8], [18, 8], [18, 1]], dtype=np.float32),
         score=0.9,
         plate_image=np.full((20, 50, 3), 64, dtype=np.uint8),

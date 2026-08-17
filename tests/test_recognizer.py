@@ -20,22 +20,14 @@ class _PoseModel:
 class _OCRModel:
     calls = []
 
-    def __init__(
-        self, det_model_path, rec_model_path, *, characters_path, **kwargs
-    ):
-        self.calls.append(
-            (det_model_path, rec_model_path, characters_path, kwargs)
-        )
+    def __init__(self, det_model_path, rec_model_path, *, characters_path, **kwargs):
+        self.calls.append((det_model_path, rec_model_path, characters_path, kwargs))
         with characters_path.open("r", encoding="utf-8") as file:
             characters = yaml.safe_load(file)
         area_characters = dict.fromkeys(
-            character
-            for area in characters["areas"]
-            for character in str(area)
+            character for area in characters["areas"] for character in str(area)
         )
-        self.decoder = SimpleNamespace(
-            character=["<blank>", *area_characters]
-        )
+        self.decoder = SimpleNamespace(character=["<blank>", *area_characters])
 
     def __call__(self, _image):
         raise AssertionError("OCR must not run when no plate is detected")
@@ -105,9 +97,7 @@ def test_recognizer_adds_new_area_names_to_ocr_and_vocabulary(monkeypatch):
     assert _OCRModel.calls[0][3]["new_area_names"] == ["札幌新", "札幌"]
 
 
-def test_recognizer_accepts_path_containing_japanese_characters(
-    monkeypatch, tmp_path
-):
+def test_recognizer_accepts_path_containing_japanese_characters(monkeypatch, tmp_path):
     import cv2
 
     import lipla
@@ -154,9 +144,7 @@ def test_system_japanese_font_falls_back_to_next_candidate(monkeypatch):
         "_SYSTEM_JAPANESE_FONT_CANDIDATES",
         ("unavailable.ttf", "system-japanese.ttf"),
     )
-    monkeypatch.setattr(
-        license_plate_recognizer.ImageFont, "truetype", load_font
-    )
+    monkeypatch.setattr(license_plate_recognizer.ImageFont, "truetype", load_font)
     monkeypatch.setattr(
         license_plate_recognizer,
         "_load_fallback_japanese_font",
@@ -247,12 +235,10 @@ def test_font_error_lists_attempted_fonts_when_download_fails(monkeypatch):
 
 
 def _make_detection_result():
-    from lipla import LPDetResult
+    from lipla import Result
 
-    return LPDetResult(
-        vertices=np.array(
-            [[5, 5], [5, 25], [45, 25], [45, 5]], dtype=np.float32
-        ),
+    return Result(
+        vertices=np.array([[5, 5], [5, 25], [45, 25], [45, 5]], dtype=np.float32),
         score=0.95,
         plate_image=np.full((40, 100, 3), 64, dtype=np.uint8),
         original_image=np.zeros((30, 50, 3), dtype=np.uint8),

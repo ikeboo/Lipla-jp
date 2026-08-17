@@ -6,7 +6,7 @@ from unittest.mock import patch
 
 import numpy as np
 
-from lipla import LPDetResult
+from lipla import Result
 
 _MODULE_PATH = Path(__file__).resolve().parents[1] / "hf_space" / "space_inference.py"
 _SPEC = spec_from_file_location("lipla_space_inference", _MODULE_PATH)
@@ -21,7 +21,7 @@ result_to_dict = _MODULE.result_to_dict
 
 
 def _result():
-    result = LPDetResult(
+    result = Result(
         vertices=np.array([[1, 2], [1, 8], [18, 8], [18, 2]], dtype=np.float32),
         score=0.95,
         plate_image=np.full((5, 10, 3), 16, dtype=np.uint8),
@@ -73,9 +73,9 @@ def test_recognize_image_converts_color_and_returns_galleries_and_json():
     )
 
     assert np.array_equal(received[0], np.array([[[3, 2, 1]]], dtype=np.uint8))
-    assert det_images[0][1] == "LPDetResult[0]"
+    assert det_images[0][1] == "Result[0]"
     assert np.array_equal(det_images[0][0], np.array([[[30, 20, 10]]]))
-    assert result_images[0][1] == "LPDetResult[0]"
+    assert result_images[0][1] == "Result[0]"
     assert np.array_equal(result_images[0][0], np.array([[[60, 50, 40]]]))
     assert json.loads(result_json) == [result_to_dict(result)]
     assert "品川" in result_json

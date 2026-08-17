@@ -208,7 +208,7 @@ def render_result_image(
 
 
 @dataclass(slots=True, eq=False)
-class LPDetResult:
+class Result:
     """検出したナンバープレートと各項目の認識結果。
 
     ``vertices`` は姿勢推定モデルと同じく、左上、左下、右下、右上の順で
