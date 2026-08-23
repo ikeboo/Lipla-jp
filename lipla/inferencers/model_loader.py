@@ -10,9 +10,9 @@ from huggingface_hub import hf_hub_download
 MODEL_REPO_ID: Final = "bukuroo/Lipla-jp"
 # Pin the default assets to an immutable commit so the same Lipla release uses
 # the same model files in every environment.
-MODEL_REVISION: Final = "c66f50ce0cc08e20318b00ad832c9b848b4d580b"
+MODEL_REVISION: Final = "2853d35a2ce7e8c15fdac437ffb756d64fc2e670"
 
-ECPOSE_MODEL_FILENAME: Final = "ecpose_m_260809.onnx"
+ECPOSE_MODEL_FILENAME: Final = "ecpose_m_260822.onnx"
 PPOCR_DET_MODEL_FILENAME: Final = "ppocrv6_det.onnx"
 PPOCR_REC_MODEL_FILENAME: Final = "ppocrv6_rec.onnx"
 PPOCR_DICT_FILENAME: Final = "inference.yml"
