@@ -83,3 +83,30 @@ def test_recognize_image_converts_color_and_returns_galleries_and_json():
 
 def test_recognize_image_clears_outputs_when_input_is_empty():
     assert recognize_image(None) == ([], [], "[]")
+
+
+def test_get_recognizer_uses_automatic_provider_selection(monkeypatch):
+    class _Session:
+        def get_providers(self):
+            return ["WebGpuExecutionProvider", "CPUExecutionProvider"]
+
+    class _Recognizer:
+        def __init__(self, *args, **kwargs):
+            self.args = args
+            self.kwargs = kwargs
+            self.pose_model = type("PoseModel", (), {"session": _Session()})()
+            self.ocr_model = type(
+                "OCRModel",
+                (),
+                {"det_session": _Session(), "rec_session": _Session()},
+            )()
+
+    monkeypatch.setattr(_MODULE, "Recognizer", _Recognizer)
+    _MODULE.get_recognizer.cache_clear()
+    try:
+        recognizer = _MODULE.get_recognizer()
+    finally:
+        _MODULE.get_recognizer.cache_clear()
+
+    assert recognizer.args == ()
+    assert recognizer.kwargs == {}

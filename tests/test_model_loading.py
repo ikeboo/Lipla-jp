@@ -3,6 +3,27 @@ from pathlib import Path
 from lipla.inferencers import model_loader
 
 
+def test_space_preload_matches_default_model_assets():
+    readme_path = Path(__file__).resolve().parents[1] / "hf_space" / "README.md"
+    preload_entry = next(
+        line.strip()
+        for line in readme_path.read_text(encoding="utf-8").splitlines()
+        if line.strip().startswith(f"- {model_loader.MODEL_REPO_ID} ")
+    )
+    filenames = ",".join(
+        (
+            model_loader.ECPOSE_MODEL_FILENAME,
+            model_loader.PPOCR_DET_MODEL_FILENAME,
+            model_loader.PPOCR_REC_MODEL_FILENAME,
+            model_loader.PPOCR_DICT_FILENAME,
+        )
+    )
+
+    assert preload_entry == (
+        f"- {model_loader.MODEL_REPO_ID} {filenames} {model_loader.MODEL_REVISION}"
+    )
+
+
 def test_download_model_file_is_anonymous_and_revision_pinned(monkeypatch, tmp_path):
     calls = []
 

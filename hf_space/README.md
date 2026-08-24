@@ -12,7 +12,7 @@ license: mit
 models:
   - bukuroo/Lipla-jp
 preload_from_hub:
-  - bukuroo/Lipla-jp ecpose_m_260822.onnx,ppocrv6_det.onnx,ppocrv6_rec.onnx,inference.yml c66f50ce0cc08e20318b00ad832c9b848b4d580b
+  - bukuroo/Lipla-jp ecpose_m_260822.onnx,ppocrv6_det.onnx,ppocrv6_rec.onnx,inference.yml 2853d35a2ce7e8c15fdac437ffb756d64fc2e670
 ---
 
 # Lipla-jp Gradio demo
