@@ -22,10 +22,15 @@ FIELD_RECTS: Final = {
     "class_number": (0.51, 0.00, 0.81, 0.36),
     "number": (0.15, 0.34, 1.00, 1.00),
 }
+CLASS_NUMBER_WIDE_RECT: Final = (0.46, 0.00, 0.81, 0.36)
+CLASS_NUMBER_EXTENSION_SCORE_TOLERANCE: Final = 0.05
 KANA_RECTS: Final = (
-    ((0.009, 0.438, 0.197, 1.00), 1.0),
-    ((0.016, 0.469, 0.197, 1.00), 0.7),
-    ((0.000, 0.375, 0.219, 1.00), 0.7),
+    # かなはプレート種別や射影誤差によって左右位置が変わる。左端を含む
+    # 広い領域と、横・上下を絞った領域を併用し、ボルトや一連指定番号の
+    # 影響を受けにくい候補を投票で選ぶ。
+    ((0.00, 0.42, 0.22, 0.95), 1.0),
+    ((0.04, 0.42, 0.18, 0.95), 1.0),
+    ((0.00, 0.42, 0.18, 0.90), 1.0),
 )
 FIELD_FILTERS: Final = {
     "class_number": ["numbers", "alphabet"],
@@ -174,7 +179,16 @@ class FixedFieldRecognizer:
             if field_name == "area":
                 candidate = self._recognize_area(crop)
             elif field_name == "class_number":
-                candidate = self._recognize_class_number(crop)
+                primary = self._recognize_class_number(crop)
+                wide = self._recognize_class_number(
+                    self._crop(image, CLASS_NUMBER_WIDE_RECT)
+                )
+                candidates[field_name].extend(
+                    candidate
+                    for candidate in self._merge_class_number_candidates(primary, wide)
+                    if candidate.text
+                )
+                continue
             else:
                 candidate = self._recognize_crop(crop, FIELD_FILTERS[field_name])
             if candidate.text:
@@ -245,6 +259,35 @@ class FixedFieldRecognizer:
             rec_outputs, filters=FIELD_FILTERS["class_number"]
         )
         return TextCandidate(str(text).strip().upper(), float(score))
+
+    @staticmethod
+    def _merge_class_number_candidates(
+        primary: TextCandidate, wide: TextCandidate
+    ) -> tuple[TextCandidate, ...]:
+        """通常領域と左へ拡張した領域の分類番号候補を統合する。
+
+        通常領域が3桁番号の先頭だけを落としたと判断できる場合は、拡張領域の
+        候補へ通常領域の信頼度を引き継ぐ。単なる信頼度順では、残った2桁の
+        スコアが極端に高くなり、正しい3桁候補を上書きするためである。
+        """
+        if not primary.text:
+            return (wide,) if wide.text else ()
+        if not wide.text:
+            return (primary,)
+        if primary.text == wide.text:
+            return (max((primary, wide), key=lambda candidate: candidate.score),)
+
+        extends_primary = (
+            len(primary.text) == 2
+            and len(wide.text) == 3
+            and wide.text.endswith(primary.text)
+        )
+        scores_are_close = (
+            wide.score >= primary.score - CLASS_NUMBER_EXTENSION_SCORE_TOLERANCE
+        )
+        if extends_primary and scores_are_close:
+            return (TextCandidate(wide.text, max(primary.score, wide.score)),)
+        return primary, wide
 
     def _single_character_scores(
         self, crop: np.ndarray, allowed_characters: Iterable[str]

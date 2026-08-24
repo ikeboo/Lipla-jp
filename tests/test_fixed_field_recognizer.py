@@ -6,7 +6,7 @@ from lipla.core.fixed_field_recognizer import (
     FixedFieldRecognizer,
     ctc_log_probability,
 )
-from lipla.core.ocr_result_parser import OCRResultParser
+from lipla.core.ocr_result_parser import OCRResultParser, TextCandidate
 
 
 class _Decoder:
@@ -75,3 +75,27 @@ def test_ctc_log_probability_prefers_high_probability_token():
     second = ctc_log_probability(log_probabilities, (2,))
 
     assert first > second
+
+
+def test_class_number_merge_restores_a_clipped_leading_digit():
+    merged = FixedFieldRecognizer._merge_class_number_candidates(
+        TextCandidate("30", 0.99), TextCandidate("130", 0.98)
+    )
+
+    assert merged == (TextCandidate("130", 0.99),)
+
+
+def test_class_number_merge_keeps_an_unreliable_wide_candidate_separate():
+    merged = FixedFieldRecognizer._merge_class_number_candidates(
+        TextCandidate("30", 0.99), TextCandidate("130", 0.80)
+    )
+
+    assert merged == (TextCandidate("30", 0.99), TextCandidate("130", 0.80))
+
+
+def test_class_number_merge_keeps_distinct_candidates_for_normal_scoring():
+    merged = FixedFieldRecognizer._merge_class_number_candidates(
+        TextCandidate("11", 0.50), TextCandidate("101", 0.80)
+    )
+
+    assert merged == (TextCandidate("11", 0.50), TextCandidate("101", 0.80))
