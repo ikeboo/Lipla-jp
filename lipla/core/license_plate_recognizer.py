@@ -139,7 +139,7 @@ class Recognizer:
         ocr_det_model_path: str | Path | None = None,
         ocr_rec_model_path: str | Path | None = None,
         *,
-        det_thresh: float = 0.7,
+        det_thresh: float = 0.1,
         ocr_thresh: float = 0.5,
         ocr_dict_path: str | Path | None = None,
         new_area_names: list[str] | None = None,

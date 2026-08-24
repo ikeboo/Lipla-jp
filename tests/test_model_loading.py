@@ -3,29 +3,23 @@ from pathlib import Path
 from lipla.inferencers import model_loader
 
 
-def test_download_model_file_is_anonymous_and_revision_pinned(
-    monkeypatch, tmp_path
-):
+def test_download_model_file_is_anonymous_and_revision_pinned(monkeypatch, tmp_path):
     calls = []
 
     def fake_hf_hub_download(**kwargs):
         calls.append(kwargs)
         return str(tmp_path / kwargs["filename"])
 
-    monkeypatch.setattr(
-        model_loader, "hf_hub_download", fake_hf_hub_download
-    )
+    monkeypatch.setattr(model_loader, "hf_hub_download", fake_hf_hub_download)
 
-    result = model_loader.download_model_file(
-        model_loader.ECPOSE_MODEL_FILENAME
-    )
+    result = model_loader.download_model_file(model_loader.ECPOSE_MODEL_FILENAME)
 
     assert result == tmp_path / model_loader.ECPOSE_MODEL_FILENAME
     assert calls == [
         {
             "repo_id": "bukuroo/Lipla-jp",
-            "filename": "ecpose_m_260809.onnx",
-            "revision": "c66f50ce0cc08e20318b00ad832c9b848b4d580b",
+            "filename": "ecpose_m_260822.onnx",
+            "revision": "2853d35a2ce7e8c15fdac437ffb756d64fc2e670",
             "cache_dir": None,
             "token": False,
             "local_files_only": False,
@@ -75,8 +69,7 @@ def test_ecpose_downloads_default_model(monkeypatch, tmp_path):
     monkeypatch.setattr(
         ec_pose,
         "download_model_file",
-        lambda filename, **kwargs: calls.append((filename, kwargs))
-        or model_path,
+        lambda filename, **kwargs: calls.append((filename, kwargs)) or model_path,
     )
     monkeypatch.setattr(ec_pose, "create_inference_session", _PoseSession)
 
@@ -131,9 +124,7 @@ def test_ppocr_downloads_unspecified_assets(monkeypatch, tmp_path):
     assert inferencer.rec_session.path == str(
         tmp_path / model_loader.PPOCR_REC_MODEL_FILENAME
     )
-    assert inferencer.decoder.dict_path == (
-        tmp_path / model_loader.PPOCR_DICT_FILENAME
-    )
+    assert inferencer.decoder.dict_path == (tmp_path / model_loader.PPOCR_DICT_FILENAME)
     assert inferencer.decoder.characters_path.name == "characters.yml"
     assert inferencer.decoder.new_area_names is None
     assert [filename for filename, _ in calls] == [

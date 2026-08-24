@@ -54,7 +54,7 @@ def test_readme_recognizer_api_uses_default_downloads(monkeypatch):
         "revision": MODEL_REVISION,
         "local_files_only": False,
     }
-    assert _PoseModel.calls == [(None, {"thresh": 0.7, **shared_options})]
+    assert _PoseModel.calls == [(None, {"thresh": 0.1, **shared_options})]
     assert len(_OCRModel.calls) == 1
     det_path, rec_path, characters_path, ocr_options = _OCRModel.calls[0]
     assert det_path is None
