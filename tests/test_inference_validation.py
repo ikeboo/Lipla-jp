@@ -2,10 +2,10 @@ import tomllib
 
 import numpy as np
 import pytest
-from lipla.inferencers.pose_detector import PoseDetector, PoseResult
 
 from lipla.core.license_plate_recognizer import Recognizer
 from lipla.core.plate_normalizer import PlateNormalizer
+from lipla.inferencers.pose_detector import PoseDetector, PoseResult
 from lipla.inferencers.ppocr import (
     CTCDecoder,
     OCRResult,

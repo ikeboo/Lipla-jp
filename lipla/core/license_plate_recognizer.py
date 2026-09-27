@@ -7,10 +7,10 @@ from pathlib import Path
 
 import numpy as np
 import yaml
-from lipla.inferencers.pose_detector import PoseDetector
 from PIL import ImageFont
 
 from lipla.inferencers.model_loader import MODEL_REVISION
+from lipla.inferencers.pose_detector import PoseDetector
 from lipla.inferencers.ppocr import PPOCR, OCRResult
 
 from .fixed_field_recognizer import (
