@@ -1,6 +1,8 @@
 import sys
 from types import SimpleNamespace
 
+import pytest
+
 from lipla.inferencers import execution_provider
 
 
@@ -122,3 +124,79 @@ def test_explicit_providers_override_automatic_selection(monkeypatch):
 
     assert sessions[0][1]["providers"] == ["CPUExecutionProvider"]
     assert sessions[0][1]["sess_options"].providers == []
+
+
+def test_webgpu_retries_fused_activation_failure_without_conv_fusion(monkeypatch):
+    devices = tuple(
+        SimpleNamespace(ep_name="WebGpuExecutionProvider") for _ in range(8)
+    )
+    monkeypatch.setattr(execution_provider, "_webgpu_devices", lambda: devices)
+    options = _SessionOptions()
+    sessions = []
+    session = object()
+
+    def create_session(path, **kwargs):
+        sessions.append((path, kwargs))
+        if len(sessions) == 1:
+            raise execution_provider.EPFail(
+                "EP_FAIL: GetFusedActivationAttr(info, activation_).IsOK() was false."
+            )
+        return session
+
+    monkeypatch.setattr(execution_provider.ort, "InferenceSession", create_session)
+
+    with pytest.warns(RuntimeWarning, match="ConvActivationFusion disabled"):
+        result = execution_provider.create_inference_session(
+            "ocr.onnx", session_options=options
+        )
+
+    assert result is session
+    assert sessions == [
+        ("ocr.onnx", {"sess_options": options}),
+        (
+            "ocr.onnx",
+            {
+                "sess_options": options,
+                "disabled_optimizers": ["ConvActivationFusion"],
+            },
+        ),
+    ]
+    assert options.providers == [(devices[:1], execution_provider._WEBGPU_OPTIONS)]
+
+
+@pytest.mark.parametrize("providers", [None, ["CPUExecutionProvider"]])
+def test_unrelated_session_failures_are_not_retried(monkeypatch, providers):
+    device = SimpleNamespace(ep_name="WebGpuExecutionProvider")
+    monkeypatch.setattr(execution_provider, "_webgpu_devices", lambda: (device,))
+    monkeypatch.setattr(execution_provider.ort, "SessionOptions", _SessionOptions)
+    sessions = []
+
+    def create_session(*args, **kwargs):
+        sessions.append((args, kwargs))
+        raise execution_provider.EPFail("device initialization failed")
+
+    monkeypatch.setattr(execution_provider.ort, "InferenceSession", create_session)
+
+    with pytest.raises(execution_provider.EPFail, match="device initialization failed"):
+        execution_provider.create_inference_session("model.onnx", providers=providers)
+
+    assert len(sessions) == 1
+
+
+def test_webgpu_retry_failure_is_propagated(monkeypatch):
+    device = SimpleNamespace(ep_name="WebGpuExecutionProvider")
+    monkeypatch.setattr(execution_provider, "_webgpu_devices", lambda: (device,))
+    monkeypatch.setattr(execution_provider.ort, "SessionOptions", _SessionOptions)
+    sessions = []
+
+    def create_session(*args, **kwargs):
+        sessions.append((args, kwargs))
+        raise execution_provider.EPFail("GetFusedActivationAttr failed")
+
+    monkeypatch.setattr(execution_provider.ort, "InferenceSession", create_session)
+
+    with pytest.warns(RuntimeWarning, match="ConvActivationFusion disabled"):
+        with pytest.raises(execution_provider.EPFail, match="GetFusedActivationAttr"):
+            execution_provider.create_inference_session("model.onnx")
+
+    assert len(sessions) == 2

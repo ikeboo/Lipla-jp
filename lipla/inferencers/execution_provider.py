@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any
 
 import onnxruntime as ort
+from onnxruntime.capi.onnxruntime_pybind11_state import EPFail
 
 _WEBGPU_REGISTRATION_NAME = "lipla_webgpu_ep"
 _WEBGPU_LOCK = threading.Lock()
@@ -77,7 +78,8 @@ def create_inference_session(
     An explicit ``providers`` list takes precedence over automatic selection.
     Without one, WebGPU is selected when the plugin can discover a device. ONNX
     Runtime keeps its built-in CPU EP as the fallback for unsupported nodes and
-    for environments where no WebGPU device is found.
+    for environments where no WebGPU device is found. If the WebGPU plugin
+    rejects a fused activation, retry without ConvActivationFusion.
     """
     options = session_options or ort.SessionOptions()
     if providers is not None:
@@ -87,5 +89,26 @@ def create_inference_session(
 
     devices = _webgpu_devices()
     if devices:
-        options.add_provider_for_devices(devices, _WEBGPU_OPTIONS)
+        # A session needs one adapter; registering every visible ZeroGPU device
+        # duplicates the provider options and does not distribute inference.
+        options.add_provider_for_devices(devices[:1], _WEBGPU_OPTIONS)
+        try:
+            return ort.InferenceSession(str(model_path), sess_options=options)
+        except EPFail as exc:
+            # ORT and the separately released WebGPU plugin can disagree about
+            # supported fused activations. Keep GPU execution and other graph
+            # optimizations, and do not hide unrelated initialization failures.
+            if "GetFusedActivationAttr" not in str(exc):
+                raise
+            warnings.warn(
+                f"WebGPU rejected a fused activation in {Path(model_path).name}; "
+                "retrying with ConvActivationFusion disabled",
+                RuntimeWarning,
+                stacklevel=2,
+            )
+            return ort.InferenceSession(
+                str(model_path),
+                sess_options=options,
+                disabled_optimizers=["ConvActivationFusion"],
+            )
     return ort.InferenceSession(str(model_path), sess_options=options)
