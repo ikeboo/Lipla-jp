@@ -15,8 +15,8 @@ import onnxruntime as ort
 
 from .execution_provider import create_inference_session
 from .model_loader import (
-    ECPOSE_MODEL_FILENAME,
     MODEL_REVISION,
+    POSE_MODEL_FILENAME,
     download_model_file,
 )
 
@@ -84,7 +84,7 @@ def _decode_keypoints(
     return np.zeros((0, 2), dtype=np.float32)
 
 
-class ECPose:
+class PoseDetector:
     """ONNX形式のEdgeCrafter姿勢推定モデルを実行する。
 
     Args:
@@ -118,7 +118,7 @@ class ECPose:
 
         if onnx_path is None:
             onnx_path = download_model_file(
-                ECPOSE_MODEL_FILENAME,
+                POSE_MODEL_FILENAME,
                 cache_dir=cache_dir,
                 revision=revision,
                 local_files_only=local_files_only,
@@ -320,7 +320,7 @@ class ECPose:
         if scores.ndim != 2 or labels.ndim != 2 or keypoints.ndim < 3:
             raise RuntimeError("ONNX pose outputs have invalid dimensions")
         if scores.shape[0] != 1 or labels.shape[0] != 1 or keypoints.shape[0] != 1:
-            raise RuntimeError("ECPose only supports a batch size of one")
+            raise RuntimeError("PoseDetector only supports a batch size of one")
         if not (scores.shape[1] == labels.shape[1] == keypoints.shape[1]):
             raise RuntimeError("ONNX pose outputs have inconsistent detection counts")
         return scores, labels, keypoints
