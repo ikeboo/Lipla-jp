@@ -685,7 +685,7 @@ wheels = [
 
 [[package]]
 name = "lipla-jp"
-version = "0.3.0"
+version = "0.4.0"
 source = { editable = "." }
 dependencies = [
     { name = "huggingface-hub" },
@@ -716,7 +716,7 @@ requires-dist = [
     { name = "matplotlib", specifier = ">=3.8.2" },
     { name = "numpy", specifier = ">=1.26.4" },
     { name = "onnxruntime", specifier = ">=1.24.4" },
-    { name = "onnxruntime-ep-webgpu", marker = "extra == 'webgpu'", specifier = ">=0.1.0" },
+    { name = "onnxruntime-ep-webgpu", marker = "extra == 'webgpu'", specifier = ">=0.3.0" },
     { name = "opencv-python", specifier = ">=4.9.0.80" },
     { name = "pillow", specifier = ">=10.2.0" },
     { name = "pyyaml", specifier = ">=6.0.1" },
@@ -879,13 +879,13 @@ wheels = [
 
 [[package]]
 name = "onnxruntime-ep-webgpu"
-version = "0.2.1"
+version = "0.3.0"
 source = { registry = "https://pypi.org/simple" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f2/b4/39a4acdadbad0e7a57af006b2e7c12e365f8163679f3337f21bfc2aecb61/onnxruntime_ep_webgpu-0.2.1-py3-none-macosx_14_0_universal2.whl", hash = "sha256:3b896f121a54ca89996724abe5891fb00e7c7b9e9be6deebe37f03bad34b7df7", size = 3484238, upload-time = "2026-07-29T19:23:56.316Z" },
-    { url = "https://files.pythonhosted.org/packages/f4/c4/f7de789c43f8a25468c0e5d4a69c28cfb3c29c84c2556c1e6e7dd4c4cee4/onnxruntime_ep_webgpu-0.2.1-py3-none-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:3ba8e49e09bac60501e71e66a5d8376f5e5fa71b94d71fe90330c4487eb0bd82", size = 4164156, upload-time = "2026-07-29T19:23:57.946Z" },
-    { url = "https://files.pythonhosted.org/packages/91/7b/f3b4f44aa2cd1de598bae93ea0bc6232150b0d2f0c758a53c881ca618d07/onnxruntime_ep_webgpu-0.2.1-py3-none-win_amd64.whl", hash = "sha256:b03af22ddace33feeac1d67f7428f113f1b60eae22a654632c0d260f6475276a", size = 12309958, upload-time = "2026-07-29T19:23:59.602Z" },
-    { url = "https://files.pythonhosted.org/packages/c1/7c/7afae563f223ce070f79f732bcbfa89648d5711b1c587ac3ee4d9528ac47/onnxruntime_ep_webgpu-0.2.1-py3-none-win_arm64.whl", hash = "sha256:077cea562aff4216a9824fb2de863d3071b6c82e8f3e1fe6577b4d9b80f9f31b", size = 13349570, upload-time = "2026-07-29T19:24:01.63Z" },
+    { url = "https://files.pythonhosted.org/packages/0f/77/cfdbe4900a5a38a8b49de9b10254e3ce77f164d246fa3126db7cb7dbc713/onnxruntime_ep_webgpu-0.3.0-py3-none-macosx_14_0_universal2.whl", hash = "sha256:facdb3ad9933cb4504c579c2085c9be1644b6912ee74d7c9a7281046d7e7155a", size = 4968942, upload-time = "2026-08-24T21:28:19.862Z" },
+    { url = "https://files.pythonhosted.org/packages/97/9c/d37bc05c56c3d91d44585db7bebbf0f068ece5d01df5b3898449771d4bf2/onnxruntime_ep_webgpu-0.3.0-py3-none-manylinux_2_28_x86_64.whl", hash = "sha256:865ce82d80319d7f259a4a65e66e32834f0f117db55ae4377868b4f28016e7bf", size = 6599236, upload-time = "2026-08-24T21:28:21.871Z" },
+    { url = "https://files.pythonhosted.org/packages/84/20/f4d51697015cb1eb0fb027b19bcc8641b93144beaed4cd332979803f0a99/onnxruntime_ep_webgpu-0.3.0-py3-none-win_amd64.whl", hash = "sha256:f25ed449a8f152176a20bc9b2f959a16511f16ff0f962a37979799d1b2d56bf7", size = 12954777, upload-time = "2026-08-24T21:28:23.96Z" },
+    { url = "https://files.pythonhosted.org/packages/31/eb/b1f9c10b7ae56f169c9b61eec91bbb66e15a95b694d39d7c8898ba8a4650/onnxruntime_ep_webgpu-0.3.0-py3-none-win_arm64.whl", hash = "sha256:a4f40d41be2db172120c2f917a8a8c69e28f8a54b221b2bd20d7fca63a291095", size = 13968714, upload-time = "2026-08-24T21:28:26.668Z" },
 ]
 
 [[package]]
