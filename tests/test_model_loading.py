@@ -3,6 +3,27 @@ from pathlib import Path
 from lipla.inferencers import model_loader
 
 
+def test_space_preload_matches_default_model_assets():
+    readme_path = Path(__file__).resolve().parents[1] / "hf_space" / "README.md"
+    preload_entry = next(
+        line.strip()
+        for line in readme_path.read_text(encoding="utf-8").splitlines()
+        if line.strip().startswith(f"- {model_loader.MODEL_REPO_ID} ")
+    )
+    filenames = ",".join(
+        (
+            model_loader.POSE_MODEL_FILENAME,
+            model_loader.PPOCR_DET_MODEL_FILENAME,
+            model_loader.PPOCR_REC_MODEL_FILENAME,
+            model_loader.PPOCR_DICT_FILENAME,
+        )
+    )
+
+    assert preload_entry == (
+        f"- {model_loader.MODEL_REPO_ID} {filenames} {model_loader.MODEL_REVISION}"
+    )
+
+
 def test_download_model_file_is_anonymous_and_revision_pinned(monkeypatch, tmp_path):
     calls = []
 
@@ -12,14 +33,14 @@ def test_download_model_file_is_anonymous_and_revision_pinned(monkeypatch, tmp_p
 
     monkeypatch.setattr(model_loader, "hf_hub_download", fake_hf_hub_download)
 
-    result = model_loader.download_model_file(model_loader.ECPOSE_MODEL_FILENAME)
+    result = model_loader.download_model_file(model_loader.POSE_MODEL_FILENAME)
 
-    assert result == tmp_path / model_loader.ECPOSE_MODEL_FILENAME
+    assert result == tmp_path / model_loader.POSE_MODEL_FILENAME
     assert calls == [
         {
             "repo_id": "bukuroo/Lipla-jp",
-            "filename": "ecpose_m_260822.onnx",
-            "revision": "2853d35a2ce7e8c15fdac437ffb756d64fc2e670",
+            "filename": "pose_m_260927.onnx",
+            "revision": "947afab7678ff50d7101e5cf802de25e9d4d0fe1",
             "cache_dir": None,
             "token": False,
             "local_files_only": False,
@@ -62,23 +83,23 @@ class _PoseSession:
 
 
 def test_ecpose_downloads_default_model(monkeypatch, tmp_path):
-    from lipla.inferencers import ec_pose
+    from lipla.inferencers import pose_detector
 
-    model_path = tmp_path / model_loader.ECPOSE_MODEL_FILENAME
+    model_path = tmp_path / model_loader.POSE_MODEL_FILENAME
     calls = []
     monkeypatch.setattr(
-        ec_pose,
+        pose_detector,
         "download_model_file",
         lambda filename, **kwargs: calls.append((filename, kwargs)) or model_path,
     )
-    monkeypatch.setattr(ec_pose, "create_inference_session", _PoseSession)
+    monkeypatch.setattr(pose_detector, "create_inference_session", _PoseSession)
 
-    inferencer = ec_pose.ECPose()
+    inferencer = pose_detector.PoseDetector()
 
     assert inferencer.session.path == str(model_path)
     assert calls == [
         (
-            model_loader.ECPOSE_MODEL_FILENAME,
+            model_loader.POSE_MODEL_FILENAME,
             {
                 "cache_dir": None,
                 "revision": model_loader.MODEL_REVISION,

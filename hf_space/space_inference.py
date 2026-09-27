@@ -3,9 +3,12 @@
 from __future__ import annotations
 
 import json
+import os
+import time
 from collections.abc import Callable
 from dataclasses import fields
 from functools import cache
+from importlib.metadata import PackageNotFoundError, version
 from typing import Any
 
 import numpy as np
@@ -18,10 +21,44 @@ _IMAGE_FIELD_NAMES = frozenset(
 )
 
 
+def _log_webgpu_installation() -> None:
+    """起動時にWebGPUプラグインのインストール状態をSpaceログへ出す。"""
+    try:
+        plugin_version = version("onnxruntime-ep-webgpu")
+    except PackageNotFoundError:
+        plugin_version = "not installed"
+    print(
+        "[Lipla] onnxruntime-ep-webgpu="
+        f"{plugin_version}; device availability is checked in the ZeroGPU worker",
+        flush=True,
+    )
+
+
+_log_webgpu_installation()
+
+
 @cache
 def get_recognizer() -> Recognizer:
-    """モデルを最初の推論時に一度だけ初期化する。"""
-    return Recognizer(providers=["CPUExecutionProvider"])
+    """モデルをワーカーごとに一度初期化し、利用中のEPをログへ出す。"""
+    started = time.perf_counter()
+    print(f"[Lipla] Initializing Recognizer in worker pid={os.getpid()}", flush=True)
+    recognizer = Recognizer()
+    session_providers = {
+        "pose": recognizer.pose_model.session.get_providers(),
+        "ocr_det": recognizer.ocr_model.det_session.get_providers(),
+        "ocr_rec": recognizer.ocr_model.rec_session.get_providers(),
+    }
+    webgpu_active = all(
+        any(provider.lower() == "webgpuexecutionprovider" for provider in providers)
+        for providers in session_providers.values()
+    )
+    elapsed = time.perf_counter() - started
+    print(
+        f"[Lipla] Recognizer initialized in {elapsed:.3f}s; "
+        f"WebGPU active={webgpu_active}; providers={session_providers}",
+        flush=True,
+    )
+    return recognizer
 
 
 def _json_compatible(value: Any) -> Any:
