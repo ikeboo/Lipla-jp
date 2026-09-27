@@ -51,7 +51,7 @@
 
     |タスク|モデル名|
     |----|----|
-    |プレート検出|EdgeCrafter Pose|
+    |プレート検出|GTR Pose|
     |OCR|PPOCRv6 medium|
 - ONNXベースのライブラリ、PyTorch依存なし
 
@@ -59,7 +59,7 @@
 このプロジェクトは[MIT License](LICENSE)のもとで公開されています。
 
 ### 🙏 Acknowledgements
-このプロジェクトでは、以下のオープンソースプロジェクトを利用しています。
+このプロジェクトでは、以下のオープンソースプロジェクトで作成したモデルを利用しています。
 
-- [EdgeCrafter](https://github.com/Intellindust-AI-Lab/EdgeCrafter)
+- [GTR](https://github.com/Intellindust-AI-Lab/GTR)
 - [PaddleOCR](https://github.com/PADDLEPADDLE/PADDLEOCR)
