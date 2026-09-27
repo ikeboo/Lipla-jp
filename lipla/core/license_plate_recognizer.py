@@ -9,8 +9,8 @@ import numpy as np
 import yaml
 from PIL import ImageFont
 
-from lipla.inferencers.ec_pose import ECPose
 from lipla.inferencers.model_loader import MODEL_REVISION
+from lipla.inferencers.pose_detector import PoseDetector
 from lipla.inferencers.ppocr import PPOCR, OCRResult
 
 from .fixed_field_recognizer import (
@@ -152,7 +152,7 @@ class Recognizer:
         characters_path = (
             Path(__file__).resolve().parents[1] / "configs" / "characters.yml"
         )
-        self.pose_model = ECPose(
+        self.pose_model = PoseDetector(
             pose_model_path,
             thresh=det_thresh,
             providers=providers,
@@ -251,7 +251,7 @@ class Recognizer:
         if vertices.shape != (4, 2) or not np.all(np.isfinite(vertices)):
             return None
 
-        # ECPoseは左上・左下・右下・右上、正規化器は左上・右上・右下・左下。
+        # PoseDetectorは左上・左下・右下・右上、正規化器は左上・右上・右下・左下。
         normalizer_vertices = np.ascontiguousarray(
             vertices[[0, 3, 2, 1]], dtype=np.float32
         )

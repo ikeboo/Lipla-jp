@@ -5,7 +5,7 @@ import pytest
 
 from lipla.core.license_plate_recognizer import Recognizer
 from lipla.core.plate_normalizer import PlateNormalizer
-from lipla.inferencers.ec_pose import ECPose, PoseResult
+from lipla.inferencers.pose_detector import PoseDetector, PoseResult
 from lipla.inferencers.ppocr import (
     CTCDecoder,
     OCRResult,
@@ -42,9 +42,7 @@ def test_preprocess_det_returns_actual_axis_scales_after_rounding():
 def test_postprocess_dbnet_restores_each_axis_with_its_own_scale(monkeypatch):
     from lipla.inferencers import ppocr
 
-    box = np.array(
-        [[10, 10], [40, 10], [40, 30], [10, 30]], dtype=np.float32
-    )
+    box = np.array([[10, 10], [40, 10], [40, 30], [10, 30]], dtype=np.float32)
     monkeypatch.setattr(
         ppocr.cv2,
         "findContours",
@@ -114,7 +112,7 @@ def test_ocr_result_uses_identity_equality_and_compact_repr():
 @pytest.mark.parametrize("threshold", [-0.1, 1.1, float("nan")])
 def test_ecpose_rejects_invalid_threshold_before_loading_model(threshold):
     with pytest.raises(ValueError, match="between 0 and 1"):
-        ECPose("unused.onnx", thresh=threshold)
+        PoseDetector("unused.onnx", thresh=threshold)
 
 
 def test_ctc_decoder_rejects_invalid_output_shape():

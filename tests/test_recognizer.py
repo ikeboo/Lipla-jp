@@ -41,7 +41,7 @@ def test_readme_recognizer_api_uses_default_downloads(monkeypatch):
     _PoseModel.calls.clear()
     _PoseModel.images.clear()
     _OCRModel.calls.clear()
-    monkeypatch.setattr(license_plate_recognizer, "ECPose", _PoseModel)
+    monkeypatch.setattr(license_plate_recognizer, "PoseDetector", _PoseModel)
     monkeypatch.setattr(license_plate_recognizer, "PPOCR", _OCRModel)
 
     rec = lipla.Recognizer()
@@ -73,7 +73,7 @@ def test_recognizer_passes_detection_threshold_to_ecpose(monkeypatch):
 
     _PoseModel.calls.clear()
     _OCRModel.calls.clear()
-    monkeypatch.setattr(license_plate_recognizer, "ECPose", _PoseModel)
+    monkeypatch.setattr(license_plate_recognizer, "PoseDetector", _PoseModel)
     monkeypatch.setattr(license_plate_recognizer, "PPOCR", _OCRModel)
 
     lipla.Recognizer(det_thresh=0.85)
@@ -85,7 +85,7 @@ def test_recognizer_stores_ocr_threshold(monkeypatch):
     import lipla
     from lipla.core import license_plate_recognizer
 
-    monkeypatch.setattr(license_plate_recognizer, "ECPose", _PoseModel)
+    monkeypatch.setattr(license_plate_recognizer, "PoseDetector", _PoseModel)
     monkeypatch.setattr(license_plate_recognizer, "PPOCR", _OCRModel)
 
     assert lipla.Recognizer().ocr_thresh == 0.5
@@ -134,7 +134,7 @@ def test_recognizer_adds_new_area_names_to_ocr_and_vocabulary(monkeypatch):
 
     _PoseModel.calls.clear()
     _OCRModel.calls.clear()
-    monkeypatch.setattr(license_plate_recognizer, "ECPose", _PoseModel)
+    monkeypatch.setattr(license_plate_recognizer, "PoseDetector", _PoseModel)
     monkeypatch.setattr(license_plate_recognizer, "PPOCR", _OCRModel)
 
     rec = lipla.Recognizer(new_area_names=["札幌新", "札幌"])
@@ -153,7 +153,7 @@ def test_recognizer_accepts_path_containing_japanese_characters(monkeypatch, tmp
     _PoseModel.calls.clear()
     _PoseModel.images.clear()
     _OCRModel.calls.clear()
-    monkeypatch.setattr(license_plate_recognizer, "ECPose", _PoseModel)
+    monkeypatch.setattr(license_plate_recognizer, "PoseDetector", _PoseModel)
     monkeypatch.setattr(license_plate_recognizer, "PPOCR", _OCRModel)
 
     source_image = np.zeros((12, 24, 3), dtype=np.uint8)
